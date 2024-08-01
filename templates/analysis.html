@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'staff_main.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Analysis</title>
+    <!-- Include Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+    <!-- Include Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Include Leaflet.markercluster plugin -->
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f3f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            font-family: 'Georgia', serif;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 20px;
+            font-weight: normal;
+            color: #333;
+        }
+        .statistics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            flex: 1 1 calc(50% - 15px); /* Adjust width to fit two boxes per row with gap */
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            box-sizing: border-box; /* Ensure padding is included in width */
+        }
+        .stat-box h3 {
+            margin: 0;
+            font-size: 24px;
+            color: #1a73e8; /* Google blue */
+        }
+        .stat-box p {
+            margin: 5px 0 0;
+            font-size: 18px;
+        }
+        select, input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #1a73e8; /* Google blue */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0c59b8; /* Darker blue */
+        }
+        #map {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+        }
+        .dot-icon {
+            background-color: red;
+            border-radius: 50%;
+            width: 6px;
+            height: 6px;
+            display: block;
+            border: 1px solid #fff;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis</h1>
+        <div class="statistics">
+            <div class="stat-box">
+                <h3>Reported Stray Animals</h3>
+                <p>{{ reported_stray_count }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Saved Stray Animals</h3>
+                <p>{{ saved_stray_count }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Adopted Animals</h3>
+                <p>{{ adopted_count }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Transaction Amount</h3>
+                <p>${{ transaction_sum }}</p>
+            </div>
+        </div>
+
+        <h2>Distribution of Stray Animals</h2>
+        <select id="animalTypeSelector" onchange="updatePieChart()">
+            <option value="reported">Reported Animal Types</option>
+            <option value="saved">Saved Animal Types</option>
+            <option value="adopted">Adopted Animal Types</option>
+        </select>
+        
+        <canvas id="animalTypeDistributionChart"></canvas>
+
+        <h2>Stray Animal Trends</h2>
+        <select id="viewSelector" onchange="updateChart()">
+            <option value="yearly">Yearly View</option>
+            <option value="monthly">Monthly View</option>
+        </select>
+        
+        <select id="dataSelector" onchange="updateChart()">
+            <option value="reported">Reported Stray Animals</option>
+            <option value="saved">Saved Stray Animals</option>
+            <option value="adopted">Adopted Animals</option>
+            <option value="transaction">Transaction Amount</option>
+        </select>
+
+        <canvas id="strayAnimalsChart"></canvas>
+
+        <h2>Stray Animal Distribution</h2>
+        <input type="text" id="searchInput" placeholder="Enter location">
+        <button onclick="searchLocation()">Search</button>
+        <br>
+        <!-- Dropdowns for filters -->
+        <label for="animalTypeFilter">Animal Type:</label>
+        <select id="animalTypeFilter">
+            <option value="">All</option>
+            <option value="dog">Dog</option>
+            <option value="cat">Cat</option>
+        </select>
+
+        <label for="reportStatusFilter">Report Status:</label>
+        <select id="reportStatusFilter">
+            <option value="">All</option>
+            <option value="checked">Checked</option>
+            <option value="unchecked">Unchecked</option>
+        </select>
+
+        <button onclick="applyFilters()">Apply Filters</button>
+        <button onclick="resetFilters()">Reset</button>
+        <div id="map"></div>
+    </div>
+    <script>
+var map = L.map('map').setView([3.127328, 101.686608], 6);  // Initial view to Malaysia
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var markers = L.markerClusterGroup();
+        map.addLayer(markers);
+        
+        function getLocations() {
+            var animalType = document.getElementById('animalTypeFilter').value;
+            var reportStatus = document.getElementById('reportStatusFilter').value;
+
+            fetch(`/get_locations?animal_type=${animalType}&report_status=${reportStatus}`)
+                .then(response => response.json())
+                .then(data => {
+                    markers.clearLayers();  // Clear existing markers
+                    data.locations.forEach(location => {
+                        var photoUrl = `/photo/${location.report_id}`; // URL to get the photo
+                        var popupContent = `
+                            <img src="${photoUrl}" class="popup-photo" alt="Photo" width="50" height="50"><br>
+                            <b>Report Id:</b> ${location.report_id}<br>
+                            <b>Description:</b> ${location.description}<br>
+                            <b>Phone:</b> ${location.phone_number}<br>
+                            <b>Date:</b> ${new Date(location.date).toLocaleDateString()}<br>
+                            <b>Time:</b> ${location.time}<br>
+                            <b>Status:</b> ${location.report_status}<br>
+                            <b>Remarks:</b> ${location.remarks}<br>
+                        `;
+
+                        var marker = L.marker([location.lat, location.lng], {
+                            icon: L.divIcon({ className: 'dot-icon' })
+                        }).bindPopup(popupContent);
+                        markers.addLayer(marker);
+                    });
+                });
+        }
+
+        function applyFilters() {
+            getLocations();
+        }
+
+        // Fetch initial data
+        applyFilters();
+
+function resetFilters() {
+    document.getElementById('animalTypeFilter').value = '';
+    document.getElementById('reportStatusFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    map.setView([4.2105, 101.9758], 6);
+    applyFilters();
+}
+
+// Initial load with no filters applied
+applyFilters();
+
+// Function to handle location search
+function searchLocation() {
+            var searchString = document.getElementById('searchInput').value;
+    
+            // Use a geocoding service (like OpenStreetMap Nominatim) to get coordinates
+            fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + searchString)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        var lat = parseFloat(data[0].lat);
+                        var lon = parseFloat(data[0].lon);
+    
+                        // Center the map on the found location
+                        map.setView([lat, lon], 10); // Adjust zoom level as needed
+                    } else {
+                        alert('Location not found.');
+                    }
+                })
+                .catch(error => console.error('Error searching location:', error));
+        }
+
+        var strayAnimalsChart;
+        var yearlyReportedCounts = JSON.parse('{{ yearly_reported_counts|tojson }}');
+        var monthlyReportedCounts = JSON.parse('{{ monthly_reported_counts|tojson }}');
+        var yearlySavedCounts = JSON.parse('{{ yearly_saved_counts|tojson }}');
+        var monthlySavedCounts = JSON.parse('{{ monthly_saved_counts|tojson }}');
+        var yearlyAdoptedCounts = JSON.parse('{{ yearly_adopted_counts|tojson }}');
+        var monthlyAdoptedCounts = JSON.parse('{{ monthly_adopted_counts|tojson }}');
+        var yearlyTransactionCounts = JSON.parse('{{ yearly_transaction_counts|tojson }}');
+        var monthlyTransactionCounts = JSON.parse('{{ monthly_transaction_counts|tojson }}');
+
+        function updateChart() {
+            var view = document.getElementById('viewSelector').value;
+            var dataType = document.getElementById('dataSelector').value;
+            var labels = [];
+            var data = [];
+            var chartTitle = '';
+
+            var counts;
+            if (dataType === 'reported') {
+                counts = view === 'yearly' ? yearlyReportedCounts : monthlyReportedCounts;
+            } else if (dataType === 'saved') {
+                counts = view === 'yearly' ? yearlySavedCounts : monthlySavedCounts;
+            } else if (dataType === 'adopted') {
+                counts = view === 'yearly' ? yearlyAdoptedCounts : monthlyAdoptedCounts;
+            } else if (dataType === 'transaction') {
+                counts = view === 'yearly' ? yearlyTransactionCounts : monthlyTransactionCounts;
+            }
+
+            if (view === 'yearly') {
+                counts.forEach(function(count) {
+                    labels.push(count._id.year || count._id);
+                    data.push(count.total_amount || count.count);
+                });
+                chartTitle = (dataType === 'transaction' ? 'Transaction Amount' : dataType.charAt(0).toUpperCase() + dataType.slice(1)) + ' by Year';
+            } else if (view === 'monthly') {
+                var selectedYear = prompt("Enter the year:");
+                var monthlyData = counts.filter(function(count) {
+                    return count._id.year == selectedYear;
+                });
+                monthlyData.forEach(function(count) {
+                    labels.push(count._id.month);
+                    data.push(count.total_amount || count.count);
+                });
+                chartTitle = (dataType === 'transaction' ? 'Transaction Amount' : dataType.charAt(0).toUpperCase() + dataType.slice(1)) + ' for ' + selectedYear;
+            }
+
+            if (strayAnimalsChart) {
+                strayAnimalsChart.destroy();
+            }
+
+            var ctx = document.getElementById('strayAnimalsChart').getContext('2d');
+            strayAnimalsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: (dataType === 'transaction' ? 'Transaction Amount' : dataType.charAt(0).toUpperCase() + dataType.slice(1)) + (view === 'monthly' ? ' (Monthly)' : ' (Yearly)'),
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: chartTitle
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        window.onload = function() {
+            updateChart();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+        var reportedAnimalTypeDistribution = JSON.parse('{{ reported_animal_type_distribution|tojson}}');
+        var adoptedAnimalTypeDistribution = JSON.parse('{{ adopted_animal_type_distribution|tojson }}');
+        var savedAnimalTypeDistribution = JSON.parse('{{ saved_animal_type_distribution|tojson }}');
+        
+        function updatePieChart() {
+            var type = document.getElementById('animalTypeSelector').value;
+            var data = [];
+            var labels = [];
+
+            var distribution;
+            if (type === 'reported') {
+                distribution = reportedAnimalTypeDistribution;
+            } else if (type === 'adopted') {
+                distribution = adoptedAnimalTypeDistribution;
+            } else if (type === 'saved') {
+                distribution = savedAnimalTypeDistribution;
+            }
+
+            distribution.forEach(function(item) {
+                labels.push(item._id);
+                data.push(item.count);
+            });
+
+            var ctx = document.getElementById('animalTypeDistributionChart').getContext('2d');
+            if (window.animalTypeChart) {
+                window.animalTypeChart.destroy();
+            }
+
+            window.animalTypeChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: type === 'reported' ? 'Reported Animals by Type' :
+                               type === 'adopted' ? 'Adopted Animals by Type' : 
+                               'Saved Animals by Type',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw + ' counts';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('animalTypeSelector').addEventListener('change', updatePieChart);
+
+        // Initial chart rendering
+        updatePieChart();
+    });
+    </script>
+</body>
+</html>

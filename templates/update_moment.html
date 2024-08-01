@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include 'staff_main.html' %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555555;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="file"],
+        textarea {
+            width: calc(100% - 22px); /* Full width minus padding and border */
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #357ae8;
+        }
+
+        img {
+            display: block;
+            margin: 10px auto 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Update Moment</h1>
+        <form action="{{ url_for('update_moment', moment_id=moment['moment_id']) }}" method="post" enctype="multipart/form-data" onsubmit="capitalizeFirstLetter()">
+            <label for="animal_id">Animal ID:</label>
+            <input type="text" id="animal_id" name="animal_id" value="{{ moment['animal_id'] }}" required>
+
+            <img src="{{ url_for('get_photo', collection_id=moment['moment_id']) }}" alt="Photo" width="150" height="150">
+
+            <label for="moment_photo">Change Moment Photo:</label>
+            <input type="file" name="moment_photo" accept="image/*">
+
+            <label for="moment_date">Moment Date:</label>
+            <input type="date" id="moment_date" name="moment_date" value="{{ moment['moment_date'] }}" required>
+
+            <label for="caption">Caption:</label>
+            <textarea id="caption" name="caption" required>{{ moment['caption'] }}</textarea>
+
+            <input type="submit" value="Update Moment">
+        </form>
+        <form action="{{ url_for('delete_moment')}}" method="post">
+            <input type="hidden" name="moment_id" value="{{ moment['moment_id'] }}">
+            <input type="submit" value="Delete Moment" style="background-color: #d9534f; margin-top: 10px;">
+        </form>
+    </div>
+</body>
+</html>

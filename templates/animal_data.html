@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% include 'staff_main.html' %}
+    <style>
+    /* Resetting default margins and padding for elements */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center; /* Center align text within body */
+        background-color: #f0f0f0;
+    }
+
+    .form-container {
+        width: 80%;
+        margin: 20px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: left; /* Left align text within container */
+    }
+
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .filters label {
+        margin-right: 5px;
+    }
+
+    .filters input,
+    .filters select {
+        padding: 8px;
+        width: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        text-align: left; /* Left align table content */
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9; /* Alternate row background color */
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #4CAF50; /* Green */
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: #45a049; /* Darker green */
+    }
+
+    .clear-button {
+        padding: 10px 20px;
+        background-color: #3498db;  /* Green */
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .clear-button:hover {
+        background-color: #2980b9;  /* Darker green */
+    }
+
+    .add-animal-button {
+        padding: 10px 20px;
+        background-color: #3498db; /* Blue */
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .add-animal-button:hover {
+        background-color: #2980b9; /* Darker blue */
+    }
+
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h1>View Animal</h1>
+    
+    <input type="text" id="search-input" placeholder="Search Animal ID/Name">
+    <label for="species-filter">Filter by Species:</label>
+    <select id="species-filter">
+        <option value="">All</option>
+        <option value="dog">Dog</option>
+        <option value="cat">Cat</option>
+    </select>
+
+    <label for="health-filter">Filter Health:</label>
+    <select id="health-filter">
+        <option value="">All</option>
+        <option value="Excellent">Excellent</option>
+        <option value="Good">Good</option>
+        <option value="Fair">Fair</option>
+        <option value="Poor">Poor</option>
+        <option value="Critical">Critical</option>
+    </select>
+
+    <label for="vaccination-filter">Filter Vaccination:</label>
+    <select id="vaccination-filter">
+        <option value="">All</option>
+        <option value="up-to-date">Up-to-date</option>
+        <option value="needs-vaccinations">Needs Vaccinations</option>
+    </select>
+
+    <label for="spayed-neutered-filter">Filter Spayed/Neutered:</label>
+    <select id="spayed-neutered-filter">
+        <option value="">All</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+    </select>
+    <br>
+    <label for="date-filter">Filter Date:</label>
+    <input type="date" id="start-date">
+    <label for="date-filter">-</label>
+    <input type="date" id="end-date">
+
+    <button id="reset-filter" class="clear-button">Clear</button>
+    <button id="add-animal" class="add-animal-button">Add Animal</button>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Animal ID</th>
+                <th>Name</th>
+                <th>Species</th>
+                <th>Breed</th>
+                <th>Age</th>
+                <th>Overall Health</th>
+                <th>Vaccination</th>
+                <th>Spayed/Neutered</th>
+                <th>Date of Intake</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="animal-table-body">
+            {% for animal in animal_data %}
+            <tr>
+                <td>{{ animal.animal_id }}</td>
+                <td>{{ animal.name}}</td>
+                <td>{{ animal.species }}</td>
+                <td>{{ animal.breed }}</td>
+                <td>{{ animal.age }}</td>
+                <td>{{ animal.overall_health }}</td>
+                <td>{{ animal.vaccination }}</td>
+                <td>{{ animal.spayed_neutered }}</td>
+                <td>{{ animal.date_of_intake}}</td>
+                <td>
+                    <button type="button" class="edit-button">
+                      <a href="{{ url_for('update_animal', animal_id=animal.animal_id) }}">Edit</a>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const speciesFilter = document.getElementById("species-filter");
+        const vaccinationFilter = document.getElementById("vaccination-filter");
+        const spayedNeuteredFilter = document.getElementById("spayed-neutered-filter");
+        const healthFilter = document.getElementById("health-filter");
+        const searchInput = document.getElementById("search-input");
+        const animalTableBody = document.getElementById("animal-table-body");
+        const resetFilterButton = document.getElementById("reset-filter");
+        const addAnimalButton = document.getElementById("add-animal"); // New button
+        const startDateInput = document.getElementById("start-date");
+        const endDateInput = document.getElementById("end-date");
+
+        startDateInput.addEventListener("change", filterAnimals);
+        endDateInput.addEventListener("change", filterAnimals);    
+        speciesFilter.addEventListener("change", filterAnimals);
+        vaccinationFilter.addEventListener("change", filterAnimals);
+        spayedNeuteredFilter.addEventListener("change", filterAnimals);
+        healthFilter.addEventListener("change", filterAnimals);
+        searchInput.addEventListener("input", searchAnimals);
+        resetFilterButton.addEventListener("click", resetFilters);
+        addAnimalButton.addEventListener("click", redirectToAnimalProfile); // Handle click event
+
+        function redirectToAnimalProfile() {
+            window.location.href = "{{ url_for('animalprofile') }}";
+        }
+
+        function filterAnimals() {
+            const species = speciesFilter.value.toLowerCase();
+            const vaccination = vaccinationFilter.value.toLowerCase();
+            const spayedNeutered = spayedNeuteredFilter.value.toLowerCase();
+            const health = healthFilter.value.toLowerCase();
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+
+            const rows = animalTableBody.querySelectorAll("tr");
+            rows.forEach(row => {
+                const animalDate = new Date(row.children[8].textContent); // Assuming date is in the 8th column
+                const speciesMatch = species === "" || row.children[2].textContent.toLowerCase() === species; // Assuming species is in the 3rd column
+                const vaccinationMatch = vaccination === "" || row.children[6].textContent.toLowerCase() === vaccination; // Assuming vaccination is in the 7th column
+                const spayedNeuteredMatch = spayedNeutered === "" || row.children[7].textContent.toLowerCase() === spayedNeutered; // Assuming spayed/neutered is in the 8th column
+                const healthMatch = health === "" || row.children[5].textContent.toLowerCase() === health; // Assuming overall health is in the 6th column
+                const dateMatch = (isNaN(startDate.getTime()) || animalDate >= startDate) &&
+                                (isNaN(endDate.getTime()) || animalDate <= endDate);
+                if (speciesMatch && vaccinationMatch && spayedNeuteredMatch && healthMatch && dateMatch) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        function searchAnimals() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+
+            const rows = animalTableBody.querySelectorAll("tr");
+            rows.forEach(row => {
+                const animalId = row.children[0].textContent.toLowerCase(); // Assuming Animal ID is in the first column
+                const animalName = row.children[1].textContent.toLowerCase(); // Assuming Animal Name is in the second column
+                if (animalId.includes(searchTerm) || animalName.includes(searchTerm)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        function resetFilters() {
+            speciesFilter.value = "";
+            vaccinationFilter.value = "";
+            spayedNeuteredFilter.value = "";
+            healthFilter.value = "";
+            startDateInput.value = ""; // Resetting start date input
+            endDateInput.value = ""; // Resetting end date input
+            searchInput.value = "";
+
+            // Resetting visibility of all rows
+            const rows = animalTableBody.querySelectorAll("tr");
+            rows.forEach(row => {
+                row.style.display = "";
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'staff_main.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Record</title>
+    <style>
+        body {
+            text-align: center; /* Center align text in body */
+            background-color: #f0f0f0; /* Optional: Background color */
+        }
+        .container {
+            width: 80%; /* Adjust as per your design */
+            margin: 20px auto; /* Center the container */
+            text-align: left; /* Left align text within the container */
+            padding: 20px; /* Optional: Add padding for spacing */
+            background-color: #fff; /* Optional: Container background color */
+            border: 1px solid #ccc; /* Optional: Container border */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Optional: Container shadow */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Optional: Remove default border spacing */
+            margin-bottom: 20px; /* Optional: Add margin below the table */
+        }
+        table, th, td {
+            border: 1px solid #ddd; /* Optional: Table border */
+            padding: 8px; /* Optional: Table cell padding */
+            text-align: center; /* Optional: Center align text in table cells */
+        }
+        th {
+            background-color: #f2f2f2; /* Optional: Header background color */
+        }
+        button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px; /* Optional: Adjust margin */
+            cursor: pointer;
+            border-radius: 5px; /* Optional: Rounded corners */
+        }
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Medical Record</h1>
+        <h2>Animal ID: {{ animal_id }}</h2>
+        <a href="{{ url_for('new_treatment', animal_id=animal_id) }}">
+            <button>Add Treatment</button>
+        </a>
+        {% if records %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Treatment ID</th>
+                    <th>Animal ID</th>
+                    <th>Treatment Date</th>
+                    <th>Next Due Date</th>
+                    <th>Treatment Type</th>
+                    <th>Treatment Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.treatment_id }}</td>
+                    <td>{{ record.animal_id }}</td>
+                    <td>{{ record.treatment_date }}</td>
+                    <td>{{ record.next_due_date }}</td>
+                    <td>{{ record.treatment_type }}</td>
+                    <td>{{ record.treatment_name }}</td>
+                    <td>
+                        <button class="edit-button">
+                            <a href="{{ url_for('view_treatment', treatment_id=record.treatment_id) }}">Edit</a>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No treatment records found for this animal.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            margin: 0 auto;
+            text-align: center; /* Center the text within the body */
+            font-family: 'Arial', sans-serif; /* Use a clean sans-serif font */
+            background-color: #f0f0f0; /* Light grey background */
+        }
+        h1 {
+            font-size: 24px;
+            margin-top: 40px;
+            color: #333; /* Dark grey color for the header */
+        }
+        .report-form {
+            background: #fff; /* White background for the form */
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+            display: inline-block;
+            text-align: left; /* Left-align the form content */
+            margin-top: 20px;
+        }
+        .report-form label {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .report-form input[type="text"],
+        .report-form input[type="password"] {
+            width: 100%; /* Full width inputs */
+            padding: 10px;
+            margin: 8px 0 16px 0;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .report-form input[type="submit"] {
+            background-color: #4285f4; /* Google blue */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .report-form input[type="submit"]:hover {
+            background-color: #357ae8; /* Darker blue on hover */
+        }
+        .report-form a {
+            color: #4285f4;
+            text-decoration: none;
+        }
+        .report-form a:hover {
+            text-decoration: underline;
+        }
+        p {
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Login</h1>
+    <form class="report-form" action="{{ url_for('login') }}" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Login">
+    </form>
+    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
+</body>
+</html>

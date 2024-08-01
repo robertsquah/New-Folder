@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% if user_logged_in %}
+        {% include 'user_main.html' %}
+    {% else %}
+        {% include 'index.html' %}
+    {% endif %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Details</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <style>
+        .container {
+            max-width: 500px; /* Set maximum width for the container */
+            margin: auto;
+            text-align: center; /* Center align the content */
+            padding: 20px; /* Add padding inside the container */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #f2f2f2;
+        }
+        .moment-post {
+            text-align: left; /* Align content within .moment-post to the left */
+            margin: 20px 0; /* Optional margin for spacing between moment records */
+        }
+
+        .left-align {
+            text-align: left; /* Left align specific elements */
+        }
+
+        .schedule-button {
+            background-color: #ff6f61; /* Your desired button color */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Smooth hover transition */
+        }
+
+        .schedule-button:hover {
+            background-color: #ff433a; /* Hover color */
+        }
+
+        .datetime-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .datetime-input {
+            width: calc(100% - 16px); /* Adjusted for padding */
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            padding-top: 60px; /* Space for the close button */
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto; /* Centered with margin */
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 80%; /* Width of modal */
+            max-width: 600px; /* Max width */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal-header .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s;
+        }
+
+        .modal-header .close:hover {
+            color: #555;
+        }
+
+        .modal-body {
+            max-height: 400px;
+            overflow-y: auto; /* Scrollable if content is too long */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group button {
+            background-color: #4CAF50; /* Green color */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .form-group button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Animal Details</h1>
+        <div class="left-align">
+            <p>
+                {% if animal.photo %}
+                <img src="{{ url_for('get_photo', collection_id=animal.animal_id) }}" alt="Animal Photo" width="250" height="250">
+                {% endif %}
+            </p>
+            <p>Name: {{ animal.name }}</p>
+            <p>Species: {{ animal.species }}</p>
+            <p>Breed: {{ animal.breed }}</p>
+            <p>Age: {{ animal.age }}</p>
+            <p>Overall Health: {{ animal.overall_health }}</p>
+            <p>Vaccination: {{ animal.vaccination }}</p>
+            <p>Spayed/Neutered: {{ animal.spayed_neutered }}</p>
+            <p>Energy Level: {{ animal.energy_level }}</p>
+            <p>Temperament: {{ animal.temperament }}</p>
+            <p>Trainability: {{ animal.trainability }}</p>
+            <p>Interaction with Other Animals: 
+                {% for interaction in animal.interaction_with_other_animals %}
+                    {{ interaction }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            <p>Date of Intake: {{ animal.date_of_intake }}</p>
+            <p>Description: {{ animal.description }}</p>
+        </div>
+
+        <h1>Moment Record</h1>
+        {% if moments %}
+            {% for moment in moments %}
+                <div class="moment-post">
+                    <div class="moment-carousel">
+                        <div class="moment-photo">
+                            <img src="{{ url_for('get_photo', collection_id=moment.moment_id) }}" width="200" height="200" alt="Moment Photo">
+                        </div>
+                    </div>
+                    <p>Moment Date: {{ moment.moment_date }}</p>
+                    <p>Caption: {{ moment.caption }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No animal moments recorded.</p>
+        {% endif %}
+
+        <button id="openModalButton" class="schedule-button">Schedule Adoption Meeting</button>
+    </div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Schedule Adoption Meeting</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="modalForm" action="{{ url_for('submit_adoption') }}" method="post">
+                    <input type="hidden" name="animal_id" value="{{ animal.animal_id }}">
+                    <input type="hidden" name="name" value="{{ animal.name }}">
+                    
+                    <div class="form-group">
+                        <label for="datetime1">Suggested Meet-up Date/Time 1:</label>
+                        <input type="datetime-local" id="datetime1" name="datetime1" >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="datetime2">Suggested Meet-up Date/Time 2:</label>
+                        <input type="datetime-local" id="datetime2" name="datetime2" >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="datetime3">Suggested Meet-up Date/Time 3:</label>
+                        <input type="datetime-local" id="datetime3" name="datetime3" >
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit">Submit Suggestions</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the modal
+        var modal = document.getElementById("myModal");
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("openModalButton");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% if user_logged_in %}
+        {% include 'user_main.html' %}
+    {% else %}
+        {% include 'index.html' %}
+    {% endif %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Information</title>
+    <style>
+        /* General reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        /* Container style */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        /* Form title */
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 5px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            text-align: center;
+        }
+        .action-buttons form {
+            display: inline-block;
+            margin: 5px;
+        }
+        .action-buttons button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .action-buttons button.reject-button {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Appointment Information</h1>
+        {% if appointments %}
+            {% for appointment in appointments %}
+                <table>
+                    <tr>
+                        <th>Adoption ID</th>
+                        <td>{{ appointment.adoption_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Animal ID</th>
+                        <td>{{ appointment.animal_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Animal Name</th>
+                        <td>{{ appointment.animal_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Adoption Status</th>
+                        <td>{{ appointment.adoption_status }}</td>
+                    </tr>
+                    {% if appointment.adoption_status != "apply" %}
+                        <tr>
+                            <th>Meeting Location</th>
+                            <td>{{ appointment.meeting_location }}</td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Submission Date and Time</th>
+                        <td>{{ appointment.submission_datetime }}</td>
+                    </tr>
+                    
+                    {% if appointment.adoption_status == "meet_up" %}
+                        <tr>
+                            <td colspan="2" class="action-buttons">
+                                <form action="{{ url_for('update_adoption_status', adoption_id=appointment.adoption_id) }}" method="POST">
+                                    <input type="hidden" name="status" value="accepted_meet_up">
+                                    <button type="submit">Accept Meet Up</button>
+                                </form>
+                                <form action="{{ url_for('update_adoption_status', adoption_id=appointment.adoption_id) }}" method="POST">
+                                    <input type="hidden" name="status" value="rejected_meet_up">
+                                    <button type="submit" class="reject-button">Reject Meet Up</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </table>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center;">No appointments found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

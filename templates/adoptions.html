@@ -1,0 +1,320 @@
+<html lang="en">
+<head>
+    {% include 'staff_main.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoption Appointments</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .save-button-container {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .delete-button {
+            background-color: #f44336;
+        }
+        .delete-button:hover {
+            background-color: #e53935;
+        }
+        .filter-search-container {
+            text-align: center; /* Center align container */
+            margin-bottom: 10px;
+        }
+
+        .filter-search-container {
+            text-align: center; /* Center align container */
+            margin-bottom: 10px;
+        }
+
+        .filter-container,
+        .search-container {
+            display: inline-block; /* Display filter and search containers inline */
+            text-align: left; /* Left align contents */
+            margin: 0 10px; /* Add margin between filter and search containers */
+        }
+
+        .filter-container label,
+        .search-container label {
+            display: inline-block; /* Display label and select/input inline */
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .filter-container select,
+        .search-container input[type="text"] {
+            width: 100%; /* Adjust width as needed */
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="filter-search-container">
+        <div class="search-container">
+            <label for="searchInput">Search:</label>
+            <input type="text" id="searchInput">
+        </div>
+        <div class="filter-container">
+            <label for="filterStatus">Filter by Status:</label>
+            <select id="filterStatus">
+                <option value="">All</option>
+                <option value="apply">Apply</option>
+                <option value="application_rejected">Application Rejected</option>
+                <option value="meet_up">Meet Up</option>
+                <option value="accepted_meet_up">Accept Meet Up</option>
+                <option value="reject_meet_up">Reject Meet Up</option>
+                <option value="adoption_success">Adoption Success</option>
+                <option value="adoption_failed">Adoption Failed</option>
+                <option value="fee_paid">Fee Paid</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="save-button-container">
+            <button id="save-button">Save</button>
+        </div>
+        <table class="table table-bordered adoptions-table">
+            <thead>
+                <tr>
+                    <th><span>Adoption</span><span>ID</span></th>
+                    <th><span>Animal</span><span>ID</span></th>
+                    <th><span>Animal</span><span>Name</span></th>
+                    <th><span>Username</span></th>
+                    <th><span>Phone</span><span>Number</span></th>
+                    <th><span>Email</span><span>Address</span></th>
+                    <th><span>Adoption</span><span>Status</span></th>
+                    <th><span>Meeting</span><span>Location</span></th>
+                    <th><span>Meeting</span><span>Note</span></th>
+                    <th><span>Submission</span><span>Date</span></th>
+                    <th><span>Action</span></th>
+                </tr>
+            </thead>
+            <tbody id="adoptions-table-body">
+                {% for adoption in adoptions %}
+                <tr data-adoption-id="{{ adoption.adoption_id }}">
+                    <td>{{ adoption.adoption_id }}</td>
+                    <td>{{ adoption.animal_id }}</td>
+                    <td>{{ adoption.animal_name }}</td>
+                    <td>{{ adoption.username }}</td>
+                    <td>{{ adoption.phone_number }}</td>
+                    <td>{{ adoption.email_address }}</td>
+                    <td>
+                        <select class="form-control adoption-status" data-adoption-id="{{ adoption.adoption_id }}">
+                            <option value="apply" {% if adoption.adoption_status == 'apply' %}selected{% endif %}>Apply</option>
+                            <option value="application_rejected" {% if adoption.adoption_status == 'application_rejected' %}selected{% endif %}>Application Rejected</option>
+                            <option value="meet_up" {% if adoption.adoption_status == 'meet_up' %}selected{% endif %}>Meet Up</option>
+                            <option value="accepted_meet_up" {% if adoption.adoption_status == 'accepted_meet_up' %}selected{% endif %}>Accepted Meet Up</option>
+                            <option value="reject_meet_up" {% if adoption.adoption_status == 'reject_meet_up' %}selected{% endif %}>Rejected Meet Up</option>
+                            <option value="adoption_success" {% if adoption.adoption_status == 'adoption_success' %}selected{% endif %}>Adoption Success</option>
+                            <option value="adoption_failed" {% if adoption.adoption_status == 'adoption_failed' %}selected{% endif %}>Adoption Failed</option>
+                            <option value="fee_paid" {% if adoption.adoption_status == 'fee_paid' %}selected{% endif %}>Fee Paid</option>
+                        </select>
+                    </td>
+                    <td contenteditable="true" class="meeting-location" data-adoption-id="{{ adoption.adoption_id }}">{{ adoption.meeting_location }}</td>
+                    <td contenteditable="true" class="meeting-note" data-adoption-id="{{ adoption.adoption_id }}">{{ adoption.meeting_note }}</td>
+                    <td>{{ adoption.submission_datetime }}</td>
+                    <td>
+                        <button class="delete-button" data-adoption-id="{{ adoption.adoption_id }}">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        document.getElementById('save-button').addEventListener('click', function() {
+            var rows = document.querySelectorAll('tbody tr');
+            var updates = [];
+            var successAdoptionId = null; // To store the adoption ID for Adoption Success status
+    
+            rows.forEach(function(row) {
+                var adoptionId = row.dataset.adoptionId;
+                var adoptionStatus = row.querySelector('.adoption-status').value;
+                var meetingLocation = row.querySelector('.meeting-location').innerText.trim();
+                var meetingNote = row.querySelector('.meeting-note').innerText.trim();
+    
+                updates.push({
+                    adoption_id: adoptionId,
+                    adoption_status: adoptionStatus,
+                    meeting_location: meetingLocation,
+                    meeting_note: meetingNote
+                });
+    
+                // Check if adoption status is Adoption Success
+                if (adoptionStatus === 'adoption_success') {
+                    successAdoptionId = adoptionId;
+                }
+            });
+    
+            // Function to update adoptions
+            function updateAdoptions() {
+                fetch('/update_adoptions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({updates: updates})
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Updates saved successfully!');
+                        // Check for existing transaction if there's a success adoption marked
+                        if (successAdoptionId) {
+                            checkTransaction(successAdoptionId);
+                        }
+                    } 
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to save updates.');
+                });
+            }
+    
+            // Function to check if a transaction exists
+            function checkTransaction(adoptionId) {
+                fetch(`/check_transaction/${adoptionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        // Show confirmation dialog
+                        if (confirm('This adoption already has a transaction. Do you want to continue to the transaction page?')) {
+                            redirectToTransaction(adoptionId);
+                        } else {
+                            // Clear parameters if cancel is pressed
+                            successAdoptionId = null;
+                        }
+                    } else {
+                        // Directly redirect to transaction page
+                        redirectToTransaction(adoptionId);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+    
+            // Function to redirect to the transaction page
+            function redirectToTransaction(adoptionId) {
+                var row = document.querySelector(`tr[data-adoption-id="${adoptionId}"]`);
+                var animalId = row.querySelector('td:nth-child(2)').innerText;
+                var username = row.querySelector('td:nth-child(4)').innerText;
+    
+                var url = `/add_transaction?adoption_id=${adoptionId}&animal_id=${animalId}&username=${username}`;
+                window.location.href = url;
+            }
+    
+            // Start updating adoptions
+            updateAdoptions();
+        });
+    
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', function() {
+                var adoptionId = this.getAttribute('data-adoption-id');
+                if (confirm('Are you sure you want to delete this adoption?')) {
+                    fetch(`/delete_adoption/${adoptionId}`, {
+                        method: 'DELETE',
+                    }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.closest('tr').remove();
+                            alert('Adoption deleted successfully!');
+                        } else {
+                            alert('Failed to delete adoption.');
+                        }
+                    });
+                }
+            });
+        });
+    
+        document.getElementById('filterStatus').addEventListener('change', filterTable);
+        document.getElementById('searchInput').addEventListener('keyup', searchTable);
+    
+        function filterTable() {
+            var status = document.getElementById('filterStatus').value;
+            var rows = document.querySelectorAll('#adoptions-table-body tr');
+            rows.forEach(function(row) {
+                var statusCell = row.querySelector('select.adoption-status').value;
+                if (!status || status === statusCell) {
+                    row.style.display = '';
+                } else if (status === 'fee_paid' && statusCell === 'fee_paid') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    
+        function searchTable() {
+            var searchText = document.getElementById('searchInput').value.toLowerCase();
+            var rows = document.querySelectorAll('#adoptions-table-body tr');
+            rows.forEach(function(row) {
+                var cells = row.querySelectorAll('td');
+                var found = false;
+                cells.forEach(function(cell) {
+                    if (cell.textContent.toLowerCase().includes(searchText)) {
+                        found = true;
+                    }
+                });
+                if (found) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+    
+    

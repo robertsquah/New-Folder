@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% if user_logged_in %} {% include 'user_main.html' %} {% else %} {% include 'index.html' %} {% endif %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Animals</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+
+        .center {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #333;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .form-container label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-container select,
+        .form-container input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .form-container button {
+            background-color: #4285F4;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-container button:hover {
+            background-color: #357AE8;
+        }
+
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 280px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .card-content h2 {
+            margin: 0 0 10px;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .card-content p {
+            color: #666;
+            margin: 0 0 15px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .adoptme-button {
+            background-color: #ff6f61;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .adoptme-button a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .adoptme-button:hover {
+            background-color: #e65b50;
+        }
+
+        .info {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px; /* Adjusted margin to push it down */
+            margin-left: 5px;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            color: #007BFF;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 160px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; 
+            left: 50%;
+            margin-left: -80px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Your existing navigational menu here -->
+    </header>
+
+    <main>
+        <section class="container">
+            <h1 class="center">Browse Animals</h1>
+            <div class="form-container">
+                <form id="filterForm">
+                    <div>
+                        <label for="species">Species:</label>
+                        <select name="species" id="species">
+                            <option value="">All</option>
+                            <option value="cat">Cat</option>
+                            <option value="dog">Dog</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="age">Age:</label>
+                        <select name="age" id="age">
+                            <option value="">All</option>
+                            <option value="young">Young</option>
+                            <option value="adult">Adult</option>
+                            <option value="senior">Senior</option>
+                        </select>
+                        <div class="info">
+                            <span class="tooltip">Age ranges
+                                <span class="tooltiptext">Young: 0-3 years<br>Adult: 4-7 years<br>Senior: 8+ years</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="search">Search:</label>
+                        <input type="text" name="search" id="search">
+                    </div>
+                    <div>
+                        <button type="submit">Apply Filters</button>
+                        <button type="button" onclick="resetFilters()">Reset Filters</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="grid">
+                {% for animal in animals %}
+                <div class="card">
+                    {% if animal.photo %}
+                    <img src="{{ url_for('get_photo', collection_id=animal.animal_id) }}" alt="Animal Photo">
+                    {% endif %}
+                    <div class="card-content">
+                        <h2>{{ animal.name }}</h2>
+                        <p>{{ animal.description }}</p>
+                        <button type="button" class="adoptme-button">
+                            <a href="{{ url_for('adoptable_animal_detail', animal_id=animal.animal_id) }}">Adopt Me</a>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <!-- Footer content here -->
+    </footer>
+
+    <script>
+        document.getElementById('filterForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const queryParams = new URLSearchParams(formData).toString();
+            window.location.href = '/browse_animals?' + queryParams;
+        });
+
+        function resetFilters() {
+            document.getElementById('species').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('search').value = '';
+            document.getElementById('filterForm').dispatchEvent(new Event('submit'));
+        }
+    </script>
+</body>
+</html>

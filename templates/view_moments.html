@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Moments</title>
+    {% include 'staff_main.html' %}
+    <style>
+        body {
+            text-align: center; /* Center aligns the h1 */
+            font-family: Arial, sans-serif; /* Example font */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            text-align: left; /* Left aligns the form and table */
+        }
+
+        .filter-input {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>View Moments</h1>
+        <div>
+            <label for="filter-moment-id">Filter by Moment ID:</label>
+            <input type="text" id="filter-moment-id" class="filter-input" onkeyup="filterTable()">
+            
+            <label for="filter-animal-id">Filter by Animal ID:</label>
+            <input type="text" id="filter-animal-id" class="filter-input" onkeyup="filterTable()">
+            
+            <label for="filter-moment-date">Filter by Moment Date:</label>
+            <input type="date" id="filter-moment-date" class="filter-input" onchange="filterTable()">
+            
+            <button type="button" onclick="resetFilters()">Reset Filters</button>
+        </div>
+        <div class="table-container">
+            <table id="moments-table">
+                <thead>
+                    <tr>
+                        <th>Moment ID</th>
+                        <th>Animal ID</th>
+                        <th>Moment Date</th>
+                        <th>Caption</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for moment in moments %}
+                    <tr>
+                        <td>{{ moment.moment_id }}</td>
+                        <td>{{ moment.animal_id }}</td>
+                        <td>{{ moment.moment_date }}</td>
+                        <td>{{ moment.caption }}</td>
+                        <td>
+                            <button class="edit-button">
+                                <a href="{{ url_for('update_moment', moment_id=moment.moment_id) }}" style="color: inherit; text-decoration: none;">Edit</a>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        function filterTable() {
+            var momentIdFilter = document.getElementById('filter-moment-id').value.toUpperCase();
+            var animalIdFilter = document.getElementById('filter-animal-id').value.toUpperCase();
+            var momentDateFilter = document.getElementById('filter-moment-date').value;
+
+            var table = document.getElementById('moments-table');
+            var tr = table.getElementsByTagName('tr');
+
+            for (var i = 1; i < tr.length; i++) {
+                var tdMomentId = tr[i].getElementsByTagName('td')[0];
+                var tdAnimalId = tr[i].getElementsByTagName('td')[1];
+                var tdMomentDate = tr[i].getElementsByTagName('td')[2];
+                
+                if (tdMomentId && tdAnimalId && tdMomentDate) {
+                    var momentIdText = tdMomentId.textContent || tdMomentId.innerText;
+                    var animalIdText = tdAnimalId.textContent || tdAnimalId.innerText;
+                    var momentDateText = tdMomentDate.textContent || tdMomentDate.innerText;
+
+                    if (momentIdText.toUpperCase().indexOf(momentIdFilter) > -1 &&
+                        animalIdText.toUpperCase().indexOf(animalIdFilter) > -1 &&
+                        (momentDateFilter === "" || momentDateText === momentDateFilter)) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-moment-id').value = "";
+            document.getElementById('filter-animal-id').value = "";
+            document.getElementById('filter-moment-date').value = "";
+
+            var table = document.getElementById('moments-table');
+            var tr = table.getElementsByTagName('tr');
+
+            for (var i = 1; i < tr.length; i++) {
+                tr[i].style.display = "";
+            }
+        }
+    </script>
+</body>
+</html>

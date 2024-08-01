@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include 'staff_main.html' %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        /* Resetting default margins and padding for elements */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center; /* Center align text within body */
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center; /* Center align the heading */
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start; /* Align items to the left */
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            text-align: left; /* Left align form labels */
+        }
+
+        .filters label {
+            margin-right: 5px;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 8px;
+            width: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            text-align: left; /* Left align table content */
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9; /* Alternate row background color */
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button.view-treatment {
+            padding: 10px 20px;
+            background-color: #3498db; /* Blue color */
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button.view-treatment:hover {
+            background-color: #2980b9;
+            background-image: linear-gradient(to bottom, #2980b9, #1f6699);
+        }
+
+        .action-button:hover {
+            background-color: #2980b9;
+            background-image: linear-gradient(to bottom, #2980b9, #1f6699);
+        }
+
+        .clear-button {
+            background-color: #3498db; /* Blue color for Clear button */
+        }
+
+        .clear-button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>View Treatment</h1>
+        <div class="filters">
+            <label for="filterDueDate">Filter by Next Due Date:</label>
+            <input type="date" id="filterDueDate">
+            <br><br>
+            <label for="filterDate">Filter by Treatment Date:</label>
+            <input type="date" id="filterDate">
+            <br><br>
+            <label for="searchInput">Search Animal Id/ Treatment Id/ Name:</label>
+            <input type="text" id="searchInput">
+            <br><br>
+            <label for="filterType">Filter by Treatment Type:</label>
+            <select id="filterType">
+                <option value="">All</option>
+                <option value="Preventative Care">Preventative Care</option>
+                <option value="Medical Treatments">Medical Treatments</option>
+                <option value="Surgical Procedures">Surgical Procedures</option>
+                <option value="Diagnostics">Diagnostics</option>
+            </select>
+            <br><br>
+            <button onclick="resetFilters()" class="clear-button">Clear</button>
+        </div>
+        <div class="button-row">
+            <button onclick="exportToPDF()" class="view-treatment">Export PDF</button>
+        </div>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Treatment ID</th>
+                    <th>Animal ID</th>
+                    <th>Treatment Date</th>
+                    <th>Next Due Date</th>
+                    <th>Treatment Type</th>
+                    <th>Treatment Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.treatment_id }}</td>
+                    <td>{{ record.animal_id }}</td>
+                    <td>{{ record.treatment_date }}</td>
+                    <td>{{ record.next_due_date }}</td>
+                    <td>{{ record.treatment_type }}</td>
+                    <td>{{ record.treatment_name }}</td>
+                    <td>
+                        <button type="button" class="edit-button">
+                          <a href="{{ url_for('view_treatment', treatment_id=record.treatment_id) }}">Edit</a>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function redirectToNewTreatment() {
+            // Replace with your URL for adding a new treatment
+            window.location.href = "{{ url_for('new_treatment') }}";
+        }
+
+        // JavaScript functions remain unchanged
+        function filterTable() {
+            var filterType = document.getElementById("filterType").value;
+            var filterDate = document.getElementById("filterDate").value;
+            var filterDueDate = document.getElementById("filterDueDate").value;
+            var table = document.querySelector("table");
+            var rows = table.querySelectorAll("tr");
+            rows.forEach(function(row, index) {
+                if (index > 0) {
+                    var typeCell = row.cells[4]; // Treatment Type column
+                    var dateCell = row.cells[2]; // Treatment Date column
+                    var dueDateCell = row.cells[3]; // Next Due Date column
+                    var showRow = true;
+                    if (filterType && typeCell.textContent.trim() !== filterType) {
+                        showRow = false;
+                    }
+                    if (filterDate && dateCell.textContent.trim() !== filterDate) {
+                        showRow = false;
+                    }
+                    if (filterDueDate && dueDateCell.textContent.trim() !== filterDueDate) {
+                        showRow = false;
+                    }
+                    if (showRow) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        }
+
+        document.getElementById("filterType").addEventListener("change", filterTable);
+        document.getElementById("filterDate").addEventListener("change", filterTable);
+        document.getElementById("filterDueDate").addEventListener("change", filterTable);
+
+        document.getElementById("searchInput").addEventListener("keyup", function() {
+            var searchText = this.value.toLowerCase();
+            var table = document.querySelector("table");
+            var rows = table.querySelectorAll("tr");
+            rows.forEach(function(row, index) {
+                if (index > 0) {
+                    var cells = row.querySelectorAll("td");
+                    var found = false;
+                    cells.forEach(function(cell) {
+                        var cellText = cell.textContent.toLowerCase();
+                        if (cellText.indexOf(searchText) !== -1) {
+                            found = true;
+                        }
+                    });
+                    if (found) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        });
+
+        function resetFilters() {
+            document.getElementById("filterType").value = "";
+            document.getElementById("filterDate").value = "";
+            document.getElementById("filterDueDate").value = "";
+            document.getElementById("searchInput").value = "";
+            filterTable();
+        }
+
+        function exportToPDF() {
+            console.log('Export PDF button clicked'); // Check if the button click is registered
+
+            // Access jsPDF and autoTable using UMD pattern
+            const { jsPDF } = window.jspdf;
+            if (typeof jsPDF) {
+                const doc = new jsPDF();
+                
+                // Example: Add some content to the PDF
+                doc.text('Animal Treatment', 10, 10);
+
+                // Generate PDF from the table
+                const table = document.querySelector('table');
+                doc.autoTable({
+                    html: table,
+                    columnStyles: {
+                        6: { cellWidth: 0 }, // Assuming 'Action' is the 7th column
+                    },
+                    willDrawCell: function(data) {
+                        // Check if this is a cell in the 'Action' column and hide it
+                        if (data.column.index === 6) {
+                            data.cell.styles.minCellHeight = 0;
+                            data.cell.styles.minCellWidth = 0;
+                            data.cell.text = ''; // Clear the text in 'Action' column cells
+                        }
+                    }
+                });
+
+                // Save the PDF
+                doc.save('animal_treatment.pdf');
+            } else {
+                console.error('jsPDF or autoTable not loaded');
+            }
+        }
+    </script>
+</body>
+</html>

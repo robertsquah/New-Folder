@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0; /* Background color similar to Google Forms */
+        padding: 20px; /* Add padding to body */
+    }
+    
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff; /* White background for form container */
+        border: 1px solid #ddd; /* Light border */
+        box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Box shadow for depth */
+    }
+    
+    .report-form {
+        /* Additional form styles */
+        margin-top: 10px;
+    }
+    
+    input[type=text], input[type=password] {
+        width: calc(100% - 20px); /* Adjust input width */
+        padding: 10px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+    
+    input[type=submit] {
+        background-color: #4CAF50; /* Green submit button */
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    input[type=submit]:hover {
+        background-color: #45a049; /* Darker green on hover */
+    }
+
+    /* Added style for header */
+    .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px; /* Set a fixed height for the header */
+    }
+
+    .header h1 {
+        margin: 0; /* Remove default margin of h1 */
+    }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Staff Login</h1>
+    </div>
+    <div class="content">
+        <form class="report-form" action="{{ url_for('stafflogin') }}" method="POST"> 
+            <label for="staffid">Staff Id:</label>
+            <input type="text" id="staffid" name="staffid" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Login">
+        </form>
+    </div>
+</body>
+</html>

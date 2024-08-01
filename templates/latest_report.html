@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% include 'staff_main.html' %}
+    <title>Latest Report</title>
+    <style>
+        /* Basic reset for margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* Body styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        /* Container for the main content */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        /* Title styles */
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        /* Form styles */
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            width: calc(50% - 10px);
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        .statusDropdown {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        /* Button styles */
+        .colorful-button {
+            background-color: #3498db;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .colorful-button:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        .colorful-button a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Latest Report</h1>
+        <form id="reportFilterForm">
+            <div class="form-group">
+                <label for="searchReportId">Search ID:</label>
+                <input type="text" id="searchReportId">
+            </div>
+            <div class="form-group">
+                <label for="filter">Filter Animal:</label>
+                <select id="filter">
+                    <option value="all">All</option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="statusFilter">Filter Status:</label>
+                <select id="statusFilter">
+                    <option value="all">All</option>
+                    <option value="checked">Checked</option>
+                    <option value="unchecked">Unchecked</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="form-group">
+                <button id="resetFiltersBtn" class="colorful-button">Clear</button>
+            </div>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Report ID</th>
+                    <th>Animal Type</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="reportTable">
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.report_id }}</td>
+                    <td>{{ report.animal_type }}</td>
+                    <td><a href="https://www.google.com/maps/search/?api=1&query={{ report.location }}" target="_blank">{{ report.location }}</a></td>
+                    <td>{{ report.date }}</td>
+                    <td>
+                        <select class="statusDropdown">
+                            <option value="checked" {% if report.report_status == 'checked' %}selected{% endif %}>Checked</option>
+                            <option value="unchecked" {% if report.report_status != 'checked' %}selected{% endif %}>Unchecked</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button type="button" class="colorful-button">
+                            <a href="{{ url_for('report_detail', report_id=report.report_id) }}">Edit</a>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // jQuery and JavaScript code for filtering and updating status
+        $(document).ready(function() {
+            // Event listener for changes in the filter dropdowns and date inputs
+            $('#filter, #statusFilter, #startDate, #endDate').change(filterReports);
+
+            // Event listener for reset button click
+            $('#resetFiltersBtn').click(function() {
+                $('#filter').val('all');
+                $('#statusFilter').val('all');
+                $('#startDate').val('');
+                $('#endDate').val('');
+                $('#searchReportId').val('');
+                filterReports();
+            });
+
+            // Event listener for status dropdown change
+            $('.statusDropdown').change(function() {
+                var status = $(this).val();
+                var reportId = $(this).closest('tr').find('td:first').text();
+                updateReportStatus(reportId, status);
+            });
+
+            // Event listener for search input
+            $('#searchReportId').on('input', filterReports);
+        });
+
+        function updateReportStatus(reportId, status) {
+            $.post('/update_status', {report_id: reportId, status: status}, function(data) {
+                if (data.message === 'Status updated successfully') {
+                    showMessage('Status updated successfully.');
+                } else {
+                    showMessage('Failed to update status.');
+                }
+            });
+        }
+
+        // Function to show a pop-up message
+        function showMessage(message) {
+            alert(message);
+        }
+
+        // Function to filter reports based on filters and search
+        function filterReports() {
+            var selectedType = $('#filter').val();
+            var selectedStatus = $('#statusFilter').val();
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var searchValue = $('#searchReportId').val().trim().toLowerCase();
+
+            $('#reportTable tr').each(function() {
+                var animalType = $(this).find('td:nth-child(2)').text().trim().toLowerCase();
+                var status = $(this).find('.statusDropdown').val();
+                var reportDate = $(this).find('td:nth-child(4)').text().trim(); // Assuming date is in the 4th column
+
+                // Check if the report date is within the selected range
+                var dateInRange = true;
+                if (startDate && endDate) {
+                    var reportDateObj = new Date(reportDate);
+                    var start = new Date(startDate);
+                    var end = new Date(endDate);
+                    dateInRange = reportDateObj >= start && reportDateObj <= end;
+                }
+
+                var matchesSearch = $(this).find('td:first').text().trim().toLowerCase().includes(searchValue);
+
+                if ((selectedType === 'all' || animalType === selectedType) &&
+                    (selectedStatus === 'all' || status === selectedStatus) &&
+                    dateInRange &&
+                    matchesSearch) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

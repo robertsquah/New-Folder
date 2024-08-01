@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FindYourPawfectBuddy</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+
+    <style>
+        /* Header Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; /* Reset default margin */
+            padding: 0; /* Reset default padding */
+        }
+
+        header {
+            background-color: #FEF9EA; /* Change nav background color */
+            overflow: hidden; /* Clear floats */
+        }
+
+        header img {
+            height: 80px; /* Adjust height to make logo smaller */
+            margin-top: 25px; /* Adjust margin as needed */
+            margin-left: 25px; /* Adjust margin as needed */
+        }
+
+        nav {
+            background-color: #FEF9EA; /* Change nav background color */
+            overflow: hidden; /* Clear floats */
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        nav ul li {
+            float: left;
+        }
+
+        nav ul li a {
+            display: block;
+            color: #333; /* Change nav link color */
+            text-align: center;
+            padding: 45px 16px;
+            text-decoration: none;
+        }
+
+        nav ul li a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .logout-form {
+            display: inline-block; /* Display form inline with other elements */
+            margin-top: 40px; /* Adjust margin as needed */
+            margin-right: 25px; /* Adjust margin as needed */
+            
+        }
+
+        .logout-form button {
+            background: none;
+            border: none;
+            color: #333; /* Change button color */
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: inherit; /* Inherit font size from parent */
+            font-family: inherit; /* Inherit font family from parent */
+        }
+
+        .logout-form button:hover {
+            color: black; /* Change button color on hover */
+        }
+
+        .content {
+            padding: 20px; /* Add padding to content area */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li>
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="FindYourPawfectBuddy Logo">
+                </li>
+                <li><a href="{{ url_for('user_home') }}">Home</a></li>
+                <li><a href="{{ url_for('browse_animals') }}">Browse Animals</a></li>
+                <li><a href="{{ url_for('report') }}">Report Stray Animal</a></li>
+                <li><a href="{{ url_for('appointment') }}">Appointment</a></li>
+                <li><a href="{{ url_for('update_user') }}">Update User</a></li>
+                <li style="float: right;">
+                    <form class="logout-form" action="{{ url_for('logout') }}" method="post">
+                      <button type="submit">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+    </header>
+</body>
+<div class="content">
+    <link rel="icon" type="image/png" href="/static/user_home.png">
+</div>
+</html>

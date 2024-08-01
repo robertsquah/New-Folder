@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+    <style>
+        /* Header Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Redesigning the Logo */
+        .logo {
+            float: left;
+            height: 100px; /* Adjust height to make logo smaller */
+            margin-top: 5px; /* Adjust margin as needed */
+            margin-left: 25px; /* Adjust margin as needed */
+        }
+
+        /* Changing Navigation Bar Color */
+        .navbar {
+            overflow: hidden;
+            background-color: #6C9D7C; /* Change the background color here */
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            text-decoration: none;
+        }
+
+        .dropdown {
+            float: left;
+            overflow: hidden;
+        }
+
+        .dropdown .dropbtn {
+            font-size: 16px;
+            border: none;
+            outline: none;
+            color: white;
+            padding: 50px 20px;
+            background-color: inherit;
+            font-family: inherit;
+            margin: 0;
+        }
+
+        .navbar a:hover, .dropdown:hover .dropbtn {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #c7f6ca;
+            min-width: 197px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            float: none;
+            color: rgb(0, 0, 0);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .dropdown:hover .dropdown-content {
+                    display: block;
+        }
+
+        .sub-dropdown {
+            position: relative;
+            display: block; /* Changed from inline-block to block */
+        }
+
+        .sub-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #c7f6ca;
+            min-width: 160px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+            z-index: 1;
+            top: 0;
+            left: 100%;
+            margin-top: -1px; /* Adjusted to position the dropdown below the button */
+        }
+
+        .sub-dropdown:hover .sub-dropdown-content {
+            display: block;
+        }
+
+        /* Logout Button Styles */
+        .logout-btn {
+            position: absolute;
+            top: -3;
+            right: 0;
+        }
+
+    </style>
+    
+</head>
+<body>
+
+    <div class="navbar">
+        <img src="{{ url_for('static', filename='green.png') }}" alt="FindYourPawfectBuddy Logo" class="logo">
+        <a href="{{ url_for('staff_home') }}">Home</a>
+        <a href="{{ url_for('latest_report') }}">Latest Stray Report</a>
+        <div class="dropdown">
+            <button class="dropbtn">Staff Management</button>
+            <div class="dropdown-content">
+                <a href="{{ url_for('register_staff') }}">Register New Staff</a>
+                <a href="{{ url_for('update_staff') }}">Update Detail</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn sub-dropdown">Adoption Management</button>
+            <div class="dropdown-content">
+                <div class="sub-dropdown">
+                    <a href="{{ url_for('display_animal') }}">Saved Stray Animal</a>
+                </div>
+                <div class="sub-dropdown"> <!-- Changed from sub-dropdown to sub-dropdown-second -->
+                    <a href="{{ url_for('animal_medical') }}">View Treatment</a>
+                </div>
+                <div class="sub-dropdown"> <!-- Changed from sub-dropdown to sub-dropdown-second -->
+                    <a href="{{ url_for('view_moments') }}">View Moment</a>
+                </div>
+                <div class="sub-dropdown"> <!-- Changed from sub-dropdown to sub-dropdown-second -->
+                    <a href="{{ url_for('adoptions') }}">Appointments</a>
+                </div>
+                <div class="sub-dropdown"> <!-- Changed from sub-dropdown to sub-dropdown-second -->
+                    <a href="{{ url_for('view_transactions') }}">View Transaction</a>
+                </div>
+            </div>
+        </div>
+
+        <a href="{{ url_for('analysis') }}">Summary</a>
+
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+</body>
+</html>

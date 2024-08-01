@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% if user_logged_in %}
+        {% include 'user_main.html' %}
+    {% else %}
+        {% include 'index.html' %}
+    {% endif %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Include Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Include Leaflet Control Geocoder CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .center {
+            text-align: center;
+        }
+        .report-form {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .report-form h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .report-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .report-form input, .report-form select, .report-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .report-form input[type="submit"] {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .report-form input[type="submit"]:hover {
+            background-color: #357ae8;
+        }
+        #map {
+            height: 300px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="center">Report Stray Animal</h1>
+    <form class="report-form" action="{{ url_for('report') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+        <label for="animal_type">Animal Type:</label>
+        <select id="animal_type" name="animal_type" required>
+            <option value="" selected disabled>Choose One</option>
+            <option value="dog">Dog</option>
+            <option value="cat">Cat</option>
+        </select>
+        
+        <label for="location">Location:</label>
+        <div id="map"></div>  <!-- Map container -->
+        <input type="hidden" id="location" name="location"> <!-- Hidden field for storing location -->
+        
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" rows="4" required></textarea>
+        
+        <label for="phone_number">Phone Number:</label>
+        <input type="tel" id="phone_number" name="phone_number" placeholder="Exp: 0112312312" required>
+        
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required readonly>
+        
+        <label for="time">Time:</label>
+        <input type="time" id="time" name="time" required readonly>
+        
+        <label for="photo">Photo:</label>
+        <input type="file" id="photo" name="photo" accept="image/*" required>
+        
+        <input type="submit" value="Submit Report">
+    </form>    
+
+    <!-- Include Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Include Leaflet Control Geocoder JavaScript -->
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script>
+        function validateForm() {
+            var animalType = document.getElementById("animal_type").value;
+            if (animalType !== "dog" && animalType !== "cat") {
+                alert("Please select either a dog or a cat.");
+                return false;
+            }
+            var location = document.getElementById("location").value;
+            if (location === "") {
+                alert("Please select a location on the map.");
+                return false;
+            }
+            return true;
+        }
+        
+        // Set current date and time to the date and time fields
+        var currentDate = new Date().toISOString().slice(0, 10);
+        var currentTime = new Date().toTimeString().slice(0, 5);
+        document.getElementById('date').value = currentDate;
+        document.getElementById('time').value = currentTime;
+
+        var map = L.map('map').setView([3.139, 101.686], 13); // Initialize the map with a starting point in Malaysia
+
+        // Add a base OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Add a search control
+        var searchControl = L.Control.geocoder({
+            defaultMarkGeocode: false,
+        }).on('markgeocode', function(e) {
+            // When a location is selected from search results, update the map view and location field
+            var latlng = e.geocode.center;
+            map.setView(latlng);
+            if (marker) {
+                // If a marker exists, remove it from the map
+                map.removeLayer(marker);
+            }
+            // Add a new marker at the selected location
+            marker = L.marker(latlng).addTo(map);
+            // Set the value of the hidden location field to the selected location coordinates
+            document.getElementById('location').value = latlng.lat + ', ' + latlng.lng;
+        }).addTo(map);
+
+        // Initialize a marker variable
+        var marker;
+
+        // Add a click event listener to the map
+        map.on('click', function(e) {
+            if (marker) {
+                // If a marker exists, remove it from the map
+                map.removeLayer(marker);
+            }
+            // Add a new marker at the clicked location
+            marker = L.marker(e.latlng).addTo(map);
+            // Set the value of the hidden location field to the clicked coordinates
+            document.getElementById('location').value = e.latlng.lat + ', ' + e.latlng.lng;
+        });
+    </script>
+</body>
+</html>

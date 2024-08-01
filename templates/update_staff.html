@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {% include 'staff_main.html' %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.css">
+    <style>
+        body {
+            text-align: center;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        .container h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        button[type="submit"], input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+    </style>
+    <title>Update Your Details</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Update Your Details</h1>
+        <div id="error-message" class="error-message"></div>
+        <form method="post" id="updateForm">
+            <label for="staffid">Staff ID:</label>
+            <input type="text" id="staffid" name="staffid" value="{{ staff.staffid }}" required readonly><br>
+            <label for="old_password">Old Password (required for any changes):</label>
+            <input type="password" id="old_password" name="old_password"><br>
+            <label for="password">New Password:</label>
+            <input type="password" id="password" name="password"><br>
+            <label for="confirm_password">Confirm New Password:</label>
+            <input type="password" id="confirm_password" name="confirm_password"><br>
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone" value="{{ staff.phone }}"><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{ staff.email }}"><br>
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address" value="{{ staff.address }}"><br>
+            <label for="birthdate">Birthdate:</label>
+            <input type="text" id="birthdate" name="birthdate" value="{{ staff.birthdate }}" class="datepicker" required><br>
+            <button type="submit">Update</button>
+        </form>
+        <form action="{{ url_for('delete_staff') }}" method="post" id="deleteForm">
+            <input type="submit" value="Delete Staff">
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.js"></script>
+    <script>
+        flatpickr('.datepicker', {
+            dateFormat: 'Y-m-d'
+        });
+
+        // Function to validate form before submission
+        document.getElementById('updateForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            var newPassword = document.getElementById('password').value;
+            var confirmNewPassword = document.getElementById('confirm_password').value;
+            var oldPassword = document.getElementById('old_password').value;
+            var errorMessageDiv = document.getElementById('error-message');
+            
+            if (oldPassword.trim() === '') {
+                alert("Old password is required.");
+                return;
+            } else if (newPassword !== confirmNewPassword) {
+                alert("New password and confirm password do not match.");
+                return;
+            }
+
+            var formData = new FormData(this);
+
+            fetch('{{ url_for("update_staff") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    errorMessageDiv.textContent = data.message;
+                }
+            })
+            .catch(error => {
+                errorMessageDiv.textContent = "An error occurred. Please try again.";
+            });
+        });
+
+        // Function to confirm user deletion
+        document.getElementById('deleteForm').addEventListener('submit', function(event) {
+            if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

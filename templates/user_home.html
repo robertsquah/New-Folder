@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% if user_logged_in %}
+        {% include 'user_main.html' %}
+    {% else %}
+        {% include 'index.html' %}
+    {% endif %}
+
+    <style>
+        /* Header Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; /* Reset default margin */
+            padding: 0; /* Reset default padding */
+            background-image: url("/static/user_home.png"); /* Set background image */
+            background-size: cover; /* Cover entire viewport */
+            background-position: center; /* Center the background image */
+            background-repeat: no-repeat; /* Prevent background image from repeating */
+            height: 100vh; /* Set the height to cover the entire viewport */
+            display: flex; /* Enable flexbox for the layout */
+            flex-direction: column; /* Arrange children in a column */
+        }
+
+        footer {
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            color: white; /* Text color */
+            text-align: center; /* Center text */
+            padding: 10px 0; /* Padding for the footer */
+            margin-top: auto; /* Push footer to the bottom */
+        }
+
+        footer p {
+            margin: 0; /* Remove default margin */
+            font-size: 14px; /* Font size */
+        }
+    </style>
+</head>
+<body>
+    <!-- This is where you can place additional content if needed -->
+
+    <footer>
+        <p>If you have any enquiries or need to reschedule your appointment, please contact us at: <a href="tel:0112948938" style="color: #ffcc00; text-decoration: none;">0112948938</a></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'staff_main.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+    <title>View Transactions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+    
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    
+        h1 {
+            text-align: center;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+    
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    
+        th {
+            background-color: #f2f2f2;
+        }
+    
+        tr:hover {
+            background-color: #f2f2f2;
+        }
+    
+        .filter-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+    
+        .filter-input {
+            margin-bottom: 10px;
+            padding: 6px;
+            width: calc(100% - 12px);
+            box-sizing: border-box;
+        }
+    
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .button-container button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 12px; /* Adjust padding if needed */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 14px; /* Adjust font size if needed */
+        }
+
+        .button-container button + button {
+            margin-left: 10px; /* Add margin between buttons */
+        }
+            
+        button:hover {
+            background-color: #45a049;
+        }
+    
+        #totalAmount {
+            margin-top: 10px;
+            text-align: right;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+    <h1>Transactions</h1>
+    <div class="filter-container">
+        <input type="text" id="searchInput" class="filter-input" placeholder="Search Transactions..." onkeyup="filterTransactions()">
+        <input type="date" id="startDateInput" class="filter-input" onchange="filterTransactions()">
+        <input type="date" id="endDateInput" class="filter-input" onchange="filterTransactions()">
+        <select id="paymentTypeInput" class="filter-input" onchange="filterTransactions()">
+            <option value="">All Payment Types</option>
+            <option value="credit_card">Credit Card</option>
+            <option value="cash">Cash</option>
+            <option value="online_banking">Online Banking</option>
+            <option value="e-wallet">E-Wallet</option>
+            <!-- Add more options as needed -->
+        </select>
+    </div>
+    <div class="button-container">
+        <button onclick="clearFilters()">Clear Filters</button>
+        <button onclick="exportPDF()">Export as PDF</button>
+        <button class="edit-button" style="margin-left: auto;" onclick="saveChanges()">Save Changes</button>
+    </div>
+    <div id="totalAmount">Total Amount: $0.00</div>
+    <table id="transactionsTable">
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Adoption ID</th>
+                <th>Animal ID</th>
+                <th>Username</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Payment Method</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td contenteditable="true">{{ transaction.transaction_id }}</td>
+                <td contenteditable="true">{{ transaction.adoption_id }}</td>
+                <td contenteditable="true">{{ transaction.animal_id }}</td>
+                <td contenteditable="true">{{ transaction.username }}</td>
+                <td contenteditable="true">{{ transaction.date }}</td>
+                <td contenteditable="true">{{ transaction.description }}</td>
+                <td contenteditable="true">{{ transaction.amount }}</td>
+                <td contenteditable="true">{{ transaction.payment_method }}</td>
+                <td>
+                    <button onclick="deleteTransaction('{{ transaction.transaction_id }}')">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    <script>
+        // Calculate total amount initially
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateTotalAmount();
+        });
+
+        function calculateTotalAmount() {
+            const table = document.getElementById('transactionsTable');
+            const rows = table.getElementsByTagName('tr');
+            let totalAmount = 0;
+
+            for (let i = 1; i < rows.length; i++) {
+                const amount = parseFloat(rows[i].getElementsByTagName('td')[6].innerText.trim());
+                totalAmount += amount;
+            }
+
+            document.getElementById('totalAmount').innerText = `Total Amount: $${totalAmount.toFixed(2)}`;
+        }
+
+        function filterTransactions() {
+            const searchInput = document.getElementById('searchInput').value.toUpperCase();
+            const startDateInput = document.getElementById('startDateInput').value;
+            const endDateInput = document.getElementById('endDateInput').value;
+            const paymentTypeInput = document.getElementById('paymentTypeInput').value;
+            const table = document.getElementById('transactionsTable');
+            const tr = table.getElementsByTagName('tr');
+            let totalAmount = 0;
+
+            for (let i = 1; i < tr.length; i++) {
+                const tdDate = tr[i].getElementsByTagName('td')[4]; // Assuming date column is the 5th column (index 4)
+                const tdPaymentMethod = tr[i].getElementsByTagName('td')[7]; // Assuming payment method column is the 8th column (index 7)
+                const trText = tr[i].textContent.toUpperCase();
+                const trDate = tdDate.textContent || tdDate.innerText;
+                const trPaymentMethod = tdPaymentMethod.textContent || tdPaymentMethod.innerText;
+                
+                // Check if the transaction date is within the selected range
+                const transactionDate = new Date(trDate);
+                const startDate = startDateInput ? new Date(startDateInput) : null;
+                const endDate = endDateInput ? new Date(endDateInput) : null;
+
+                if (
+                    trText.indexOf(searchInput) > -1 &&
+                    (!startDate || transactionDate >= startDate) &&
+                    (!endDate || transactionDate <= endDate) &&
+                    (!paymentTypeInput || trPaymentMethod === paymentTypeInput)
+                ) {
+                    tr[i].style.display = '';
+                    const amount = parseFloat(tr[i].getElementsByTagName('td')[6].innerText.trim());
+                    totalAmount += amount;
+                } else {
+                    tr[i].style.display = 'none';
+                }
+            }
+
+            document.getElementById('totalAmount').innerText = `Total Amount: $${totalAmount.toFixed(2)}`;
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('startDateInput').value = '';
+            document.getElementById('endDateInput').value = '';
+            document.getElementById('paymentTypeInput').value = '';
+            filterTransactions();
+        }
+
+        function deleteTransaction(transactionId) {
+            fetch(`/delete_transaction`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ transaction_id: transactionId })
+            }).then(response => {
+                if (response.ok) {
+                    alert('Transaction deleted successfully');
+                    location.reload();
+                } else {
+                    alert('Failed to delete transaction');
+                }
+            });
+        }
+
+        function saveChanges() {
+            const table = document.getElementById('transactionsTable');
+            const rows = table.getElementsByTagName('tr');
+            let transactions = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                if (cells.length > 1) {
+                    const transaction_id = cells[0].innerText.trim();
+                    const adoption_id = cells[1].innerText.trim();
+                    const animal_id = cells[2].innerText.trim();
+                    const username = cells[3].innerText.trim();
+                    const date = cells[4].innerText.trim();
+                    const description = cells[5].innerText.trim();
+                    const amount = cells[6].innerText.trim();
+                    const payment_method = cells[7].innerText.trim();
+
+                    transactions.push({
+                        'transaction_id': transaction_id,
+                        'adoption_id': adoption_id,
+                        'animal_id': animal_id,
+                        'username': username,
+                        'date': date,
+                        'description': description,
+                        'amount': amount,
+                        'payment_method': payment_method
+                    });
+                }
+            }
+
+            fetch('/save_transaction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(transactions)
+            }).then(response => {
+                if (response.ok) {
+                    alert('Changes saved successfully');
+                } else {
+                    alert('Failed to save changes');
+                }
+            });
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Adoption Transactions", 15, 15);
+            const tableElement = document.getElementById('transactionsTable').cloneNode(true);
+
+            // Remove the last column (Actions) for the PDF
+            const rows = tableElement.getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].removeChild(rows[i].lastElementChild);
+            }
+
+            doc.autoTable({ html: tableElement, startY: 25 });
+            doc.text(document.getElementById('totalAmount').innerText, 15, doc.lastAutoTable.finalY + 10);
+            doc.save('transactions.pdf');
+        }
+    </script>
+</body>
+</html>

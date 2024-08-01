@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% include 'staff_main.html' %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Treatment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0; /* Background color similar to Google Forms */
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto; /* Centered container with some margin */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff; /* White background */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Subtle shadow */
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px; /* Space below the title */
+        }
+        form {
+            text-align: left;
+            margin-bottom: 10px; /* Added margin between forms */
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensure padding is included in width */
+        }
+        input[type="submit"] {
+            background-color: #4CAF50; /* Green button */
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Update Treatment</h1>
+        <form id="updateForm" action="{{ url_for('view_treatment', treatment_id=treatment.treatment_id) }}" method="post" onsubmit="return showSuccessMessage('Update successful!')">
+            <span>Treatment ID: {{ treatment.treatment_id }}</span><br><br>
+
+            <label for="animal_id">Animal ID:</label>
+            <input type="text" id="animal_id" name="animal_id" value="{{ treatment.animal_id }}" required><br>
+
+            <label for="treatment_date">Treatment Date:</label>
+            <input type="date" id="treatment_date" name="treatment_date" value="{{ treatment.treatment_date }}" required><br>
+
+            <label for="next_due_date">Next Due Date:</label>
+            <input type="date" id="next_due_date" name="next_due_date" value="{{ treatment.next_due_date }}"><br>
+
+            <label for="treatment_type">Treatment Type:</label>
+            <select id="treatment_type" name="treatment_type" required onchange="populateTreatmentNames()">
+                <option value="" disabled>Select Treatment Type</option>
+                <option value="Preventative Care" {% if treatment.treatment_type == "Preventative Care" %} selected {% endif %}>Preventative Care</option>
+                <option value="Medical Treatments" {% if treatment.treatment_type == "Medical Treatments" %} selected {% endif %}>Medical Treatments</option>
+                <option value="Surgical Procedures" {% if treatment.treatment_type == "Surgical Procedures" %} selected {% endif %}>Surgical Procedures</option>
+                <option value="Diagnostics" {% if treatment.treatment_type == "Diagnostics" %} selected {% endif %}>Diagnostics</option>
+                <option value="Others" {% if treatment.treatment_type == "Others" %} selected {% endif %}>Others</option>
+            </select><br>
+
+            <label for="treatment_name">Treatment Name:</label>
+            <select id="treatment_name_dropdown" name="treatment_name">
+                <!-- Populate treatment names dynamically based on treatment type -->
+            </select>
+            <input type="text" id="treatment_name_text" name="treatment_name_text" style="display: none;" value="{{ treatment.treatment_name }}"><br>
+
+            <label for="diagnosis">Diagnosis:</label>
+            <textarea id="diagnosis" name="diagnosis" rows="4" cols="50">{{ treatment.diagnosis }}</textarea><br>
+
+            <label for="veterinarian">Veterinarian:</label>
+            <input type="text" id="veterinarian" name="veterinarian" value="{{ treatment.veterinarian }}"><br>
+
+            <label for="veterinary_clinic">Veterinary Clinic:</label>
+            <input type="text" id="veterinary_clinic" name="veterinary_clinic" value="{{ treatment.veterinary_clinic }}"><br>
+
+            <label for="notes">Notes:</label>
+            <textarea id="notes" name="notes" rows="4" cols="50">{{ treatment.notes }}</textarea><br>
+
+            <input type="submit" value="Update">
+        </form>
+        <form id="deleteForm" action="{{ url_for('delete_treatment', treatment_id=treatment.treatment_id) }}" method="post" onsubmit="return showSuccessMessage('Delete successful!')">
+            <input type="submit" value="Delete">
+        </form>
+    </div>
+    <script>
+        function showSuccessMessage(message) {
+            alert(message);
+            return true;
+        }
+        window.onload = function() {
+            // Call the populateTreatmentNames function when the page loads
+            populateTreatmentNames();
+        };
+        function populateTreatmentNames() {
+            var treatmentType = document.getElementById("treatment_type").value;
+            var treatmentNameDropdown = document.getElementById("treatment_name_dropdown");
+            var treatmentNameText = document.getElementById("treatment_name_text");
+
+            // Clear previous options
+            treatmentNameDropdown.innerHTML = "";
+
+            // Show/hide the text input based on the selected option
+            if (treatmentType === "Others") {
+                treatmentNameDropdown.style.display = "none";
+                treatmentNameText.style.display = "inline";
+            } else {
+                treatmentNameDropdown.style.display = "inline";
+                treatmentNameText.style.display = "none";
+
+                // Populate treatment names based on treatment type
+                switch (treatmentType) {
+                    case "Preventative Care":
+                        addOption(treatmentNameDropdown, "Vaccination", "Vaccination");
+                        addOption(treatmentNameDropdown, "Deworming", "Deworming");
+                        addOption(treatmentNameDropdown, "Flea Treatment", "Flea Treatment");
+                        break;
+                    case "Medical Treatments":
+                        addOption(treatmentNameDropdown, "Antibiotics", "Antibiotics");
+                        addOption(treatmentNameDropdown, "Pain Management", "Pain Management");
+                        addOption(treatmentNameDropdown, "IV Fluids", "IV Fluids");
+                        break;
+                    case "Surgical Procedures":
+                        addOption(treatmentNameDropdown, "Spaying/Neutering", "Spaying/Neutering");
+                        addOption(treatmentNameDropdown, "Tumor Removal", "Tumor Removal");
+                        addOption(treatmentNameDropdown, "Orthopedic Surgery", "Orthopedic Surgery");
+                        break;
+                    case "Diagnostics":
+                        addOption(treatmentNameDropdown, "X-ray", "X-ray");
+                        addOption(treatmentNameDropdown, "Blood Test", "Blood Test");
+                        addOption(treatmentNameDropdown, "Ultrasound", "Ultrasound");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        function addOption(selectElement, text, value) {
+            var option = document.createElement("option");
+            option.text = text;
+            option.value = value;
+            selectElement.add(option);
+        }
+    </script>
+</body>
+</html>

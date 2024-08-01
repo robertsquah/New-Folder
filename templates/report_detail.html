@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% include 'staff_main.html' %}
+    <title>Report Detail</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            text-align: left;  /* Change this from 'center' to 'left' */
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+            max-width: 400px;  /* Add this to limit the width of the container */
+            width: 100%;  /* Add this to make it responsive */
+        }
+        .colorful-button {
+            background-color: #4CAF50; /* Green background */
+            border: none;
+            color: white; /* White text */
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px; /* Rounded corners */
+            transition: background-color 0.3s, transform 0.3s; /* Smooth transitions */
+        }
+        .colorful-button:hover {
+            background-color: #45a049; /* Darker green on hover */
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+        select, input[type="text"] {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <h1>Report Detail</h1>
+            {% if report.photo %}
+            <img src="{{ url_for('get_photo', collection_id=report.report_id) }}" alt="Report Photo" width="150" height="150">
+            {% endif %}
+            <p>Report ID: {{ report.report_id }}</p>
+            <p>Animal Type: {{ report.animal_type }}</p>
+            <p>Location: {{ report.location }}</p>
+            <p>Description: {{ report.description }}</p>
+            <p>Phone Number: {{ report.phone_number }}</p>
+            <p>Date: {{ report.date }}</p>
+            <p>Time: {{ report.time }}</p>
+            <p>
+            <label for="status">Status:</label>
+            <select class="statusDropdown">
+                <option value="checked" {% if report.report_status == 'checked' %}selected{% endif %}>Checked</option>
+                <option value="unchecked" {% if report.report_status != 'checked' %}selected{% endif %}>Unchecked</option>
+            </select>
+            </p>
+            <p>
+            <label for="remarks">Remarks:</label>
+            <input type="text" class="remarksInput" value="{{ report.remarks }}">
+            <button class="colorful-button updateRemarksBtn">Submit</button>
+            </p>
+            <p>
+            <button class="colorful-button deleteBtn" data-report-id="{{ report._id }}">Delete</button>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Event listener for status dropdown change
+            $('.statusDropdown').change(function() {
+                var status = $(this).val();
+                var reportId = '{{ report.report_id }}';
+                updateReportStatus(reportId, status);
+            });
+    
+            // Event listener for update remarks button click
+            $('.updateRemarksBtn').click(function() {
+                var remarks = $(this).prev('.remarksInput').val();
+                var reportId = '{{ report.report_id }}';
+                updateReportRemarks(reportId, remarks);
+            });
+
+            // Event listener for delete button click
+            $('.deleteBtn').click(function() {
+                var reportId = $(this).data('report-id');
+                if (confirm("Are you sure you want to delete this report?")) {
+                    deleteReport(reportId);
+                }
+            });
+        });
+    
+        // Function to show a pop-up message
+        function showMessage(message) {
+            alert(message);
+        }
+    
+        // Function to update report status
+        function updateReportStatus(reportId, status) {
+            $.post('/update_status', {report_id: reportId, status: status}, function(data) {
+                if (data.status === 'success') {
+                    showMessage('Status updated successfully.');
+                } else {
+                    showMessage('Failed to update status.');
+                }
+            });
+        }
+    
+        // Function to update report remarks
+        function updateReportRemarks(reportId, remarks) {
+            $.post('/update_remarks', {report_id: reportId, remarks: remarks}, function(data) {
+                if (data.status === 'success') {
+                    showMessage('Remarks updated successfully.');
+                } else {
+                    showMessage('Failed to update remarks.');
+                }
+            });
+        }
+
+        // Function to delete report
+        function deleteReport(reportId) {
+            $.post('/delete_report', {report_id: reportId}, function(data) {
+                if (data.status === 'success') {
+                    showMessage('Report deleted successfully.');
+                    // Redirect to latest report page
+                    window.location.href = '/latest_report';
+                } else {
+                    showMessage('Failed to delete report.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

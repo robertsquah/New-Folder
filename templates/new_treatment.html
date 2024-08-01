@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include 'staff_main.html' %}
+    <title>Add Treatment</title>
+    <style>
+        body {
+            margin: 0;
+            text-align: center; /* Center align text */
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .form-container {
+            width: 30%; /* Adjust width as needed */
+            margin: 20px auto; /* Center align container */
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: left; /* Left align form elements */
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            text-align: left; /* Left align form elements */
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50; /* Green background */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Add Treatment</h1>
+        <form action="{{ url_for('new_treatment') }}" method="post" onsubmit="capitalizeFirstLetter()">
+            <label for="animal_id">Animal ID:</label>
+            <input type="text" id="animal_id" name="animal_id" value="{{ animal_id }}" required readonly><br><br>
+            
+            <label for="treatment_date">Treatment Date:</label>
+            <input type="date" id="treatment_date" name="treatment_date" required><br><br>
+
+            <label for="next_due_date">Next Due Date:</label>
+            <input type="date" id="next_due_date" name="next_due_date"><br><br>
+
+            <label for="treatment_type">Treatment Type:</label>
+            <select id="treatment_type" name="treatment_type" required onchange="populateTreatmentNames()">
+                <option value="" disabled selected>Select Treatment Type</option>
+                <option value="Preventative Care">Preventative Care</option>
+                <option value="Medical Treatments">Medical Treatments</option>
+                <option value="Surgical Procedures">Surgical Procedures</option>
+                <option value="Diagnostics">Diagnostics</option>
+                <option value="Others">Others</option>
+            </select><br><br>
+            
+            <label for="treatment_name">Treatment Name:</label>
+            <select id="treatment_name_dropdown" name="treatment_name">
+                <option value="" disabled selected>Select Treatment Name</option>
+                <option value="Others">Others</option>
+            </select>
+            <input type="text" id="treatment_name_text" name="treatment_name_text" style="display: none;"><br><br>
+            
+            <label for="diagnosis">Diagnosis:</label><br>
+            <textarea id="diagnosis" name="diagnosis" rows="4" cols="50"></textarea><br><br>
+
+            <label for="veterinarian">Veterinarian:</label>
+            <input type="text" id="veterinarian" name="veterinarian"><br><br>
+
+            <label for="veterinary_clinic">Veterinary Clinic:</label>
+            <input type="text" id="veterinary_clinic" name="veterinary_clinic"><br><br>
+
+            <label for="notes">Notes:</label><br>
+            <textarea id="notes" name="notes" rows="4" cols="50"></textarea><br><br>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const animalId = urlParams.get('animal_id');
+        if (animalId) {
+            document.getElementById('animal_id').value = animalId;
+        }
+    });
+
+    function populateTreatmentNames() {
+        var treatmentType = document.getElementById("treatment_type").value;
+        var treatmentNameDropdown = document.getElementById("treatment_name_dropdown");
+        var treatmentNameText = document.getElementById("treatment_name_text");
+
+        // Clear previous options
+        treatmentNameDropdown.innerHTML = "";
+
+        // Show/hide the text input based on the selected option
+        if (treatmentType === "Others") {
+            treatmentNameDropdown.style.display = "none";
+            treatmentNameText.style.display = "inline";
+        } else {
+            treatmentNameDropdown.style.display = "inline";
+            treatmentNameText.style.display = "none";
+
+            // Populate treatment names based on treatment type
+            switch (treatmentType) {
+                case "Preventative Care":
+                    addOption(treatmentNameDropdown, "Vaccination", "Vaccination");
+                    addOption(treatmentNameDropdown, "Deworming", "Deworming");
+                    addOption(treatmentNameDropdown, "Flea Treatment", "Flea Treatment");
+                    break;
+                case "Medical Treatments":
+                    addOption(treatmentNameDropdown, "Antibiotics", "Antibiotics");
+                    addOption(treatmentNameDropdown, "Pain Management", "Pain Management");
+                    addOption(treatmentNameDropdown, "IV Fluids", "IV Fluids");
+                    break;
+                case "Surgical Procedures":
+                    addOption(treatmentNameDropdown, "Spaying/Neutering", "Spaying/Neutering");
+                    addOption(treatmentNameDropdown, "Tumor Removal", "Tumor Removal");
+                    addOption(treatmentNameDropdown, "Orthopedic Surgery", "Orthopedic Surgery");
+                    break;
+                case "Diagnostics":
+                    addOption(treatmentNameDropdown, "X-ray", "X-ray");
+                    addOption(treatmentNameDropdown, "Blood Test", "Blood Test");
+                    addOption(treatmentNameDropdown, "Ultrasound", "Ultrasound");
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    function addOption(selectElement, text, value) {
+        var option = document.createElement("option");
+        option.text = text;
+        option.value = value;
+        selectElement.add(option);
+    }
+
+    function capitalizeFirstLetter() {
+        var inputField = document.getElementById("animal_id");
+        var value = inputField.value;
+        inputField.value = value.charAt(0).toUpperCase() + value.slice(1);
+    }
+</script>
+</html>

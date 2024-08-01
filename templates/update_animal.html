@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include 'staff_main.html' %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin: 10px 0 5px;
+            color: #555;
+        }
+        
+        input[type="text"], input[type="number"], input[type="date"], input[type="file"], select, textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        input[type="radio"], input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        input[type="submit"] {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 5px 0;
+        }
+        
+        input[type="submit"]:hover {
+            background-color: #357ae8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Animal Profile Update</h1>
+        <p>
+            {% if animal.photo %}
+                <img src="{{ url_for('get_photo', collection_id=animal.animal_id) }}" alt="Animal Photo" width="150" height="150">
+            {% endif %}
+        </p>
+        <span>Animal Id: {{ animal.animal_id }}</span>
+        <form action="{{ url_for('update_animal', animal_id=animal.animal_id) }}" method="post" enctype="multipart/form-data">
+            <label for="photo">New Photo:</label>
+            <input type="file" id="photo" name="photo" accept="image/*">
+
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="{{ animal.name }}" required>
+
+            <label for="species">Species:</label>
+            <select id="species" name="species" required>
+                <option value="" disabled>Select Species</option>
+                <option value="dog" {% if animal.species == 'dog' %} selected {% endif %}>Dog</option>
+                <option value="cat" {% if animal.species == 'cat' %} selected {% endif %}>Cat</option>
+            </select>
+            
+            <label for="breed">Breed:</label>
+            <input type="text" id="breed" name="breed" value="{{ animal.breed }}" required>
+            
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" value="{{ animal.age }}" required>
+            
+            <label for="overall_health">Overall Health:</label>
+            <select id="overall_health" name="overall_health" required>
+                <option value="" disabled>Select Overall Health</option>
+                <option value="Excellent" {% if animal.overall_health == 'Excellent' %} selected {% endif %}>Excellent</option>
+                <option value="Good" {% if animal.overall_health == 'Good' %} selected {% endif %}>Good</option>
+                <option value="Fair" {% if animal.overall_health == 'Fair' %} selected {% endif %}>Fair</option>
+                <option value="Poor" {% if animal.overall_health == 'Poor' %} selected {% endif %}>Poor</option>
+                <option value="Critical" {% if animal.overall_health == 'Critical' %} selected {% endif %}>Critical</option>
+            </select>
+            
+            <label for="vaccination">Vaccination:</label>
+            <div class="radio-group">
+                <input type="radio" id="up-to-date" name="vaccination" value="up-to-date" {% if animal.vaccination == 'up-to-date' %} checked {% endif %} required>
+                <label for="up-to-date">Up-to-date</label>
+                <input type="radio" id="needs-vaccinations" name="vaccination" value="needs-vaccinations" {% if animal.vaccination == 'needs-vaccinations' %} checked {% endif %} required>
+                <label for="needs-vaccinations">Needs Vaccinations</label>
+            </div>
+            
+            <label for="spayed_neutered">Spayed/Neutered:</label>
+            <div class="radio-group">
+                <input type="radio" id="yes" name="spayed_neutered" value="yes" {% if animal.spayed_neutered == 'yes' %} checked {% endif %} required>
+                <label for="yes">Yes</label>
+                <input type="radio" id="no" name="spayed_neutered" value="no" {% if animal.spayed_neutered == 'no' %} checked {% endif %} required>
+                <label for="no">No</label>
+            </div>
+            
+            <label for="energy_level">Energy Level:</label>
+            <select id="energy_level" name="energy_level" required>
+                <option value="" disabled>Select Energy Level</option>
+                <option value="high" {% if animal.energy_level == 'high' %} selected {% endif %}>High</option>
+                <option value="medium" {% if animal.energy_level == 'medium' %} selected {% endif %}>Medium</option>
+                <option value="low" {% if animal.energy_level == 'low' %} selected {% endif %}>Low</option>
+            </select>
+            
+            <label for="temperament">Temperament:</label>
+            <select id="temperament" name="temperament" required>
+                <option value="" disabled>Select Temperament</option>
+                <option value="playful" {% if animal.temperament == 'playful' %} selected {% endif %}>Playful</option>
+                <option value="shy" {% if animal.temperament == 'shy' %} selected {% endif %}>Shy</option>
+                <option value="anxious" {% if animal.temperament == 'anxious' %} selected {% endif %}>Anxious</option>
+                <option value="energetic" {% if animal.temperament == 'energetic' %} selected {% endif %}>Energetic</option>
+                <option value="curious" {% if animal.temperament == 'curious' %} selected {% endif %}>Curious</option>
+                <option value="aggressive" {% if animal.temperament == 'aggressive' %} selected {% endif %}>Aggressive</option>
+            </select>
+
+            <label for="trainability">Trainability:</label>
+            <select id="trainability" name="trainability" required>
+                <option value="" disabled>Select Trainability</option>
+                <option value="eager_to_please" {% if animal.trainability == 'eager_to_please' %} selected {% endif %}>Eager to Please</option>
+                <option value="independent" {% if animal.trainability == 'independent' %} selected {% endif %}>Independent</option>
+                <option value="stubborn" {% if animal.trainability == 'stubborn' %} selected {% endif %}>Stubborn</option>
+            </select>
+            
+            <label for="interaction_with_other_animals">Interaction with Other Animals:</label>
+            <div class="checkbox-group">
+                <input type="checkbox" id="good_with_dogs" name="interaction_with_other_animals" value="good_with_dogs" {% if 'good_with_dogs' in animal.interaction_with_other_animals %} checked {% endif %}>
+                <label for="good_with_dogs">Good with Dogs</label>
+                <input type="checkbox" id="good_with_cats" name="interaction_with_other_animals" value="good_with_cats" {% if 'good_with_cats' in animal.interaction_with_other_animals %} checked {% endif %}>
+                <label for="good_with_cats">Good with Cats</label>
+                <input type="checkbox" id="good_with_children" name="interaction_with_other_animals" value="good_with_children" {% if 'good_with_children' in animal.interaction_with_other_animals %} checked {% endif %}>
+                <label for="good_with_children">Good with Children</label>
+            </div>
+            
+            <label for="date_of_intake">Date of Intake:</label>
+            <input type="date" id="date_of_intake" name="date_of_intake" value="{{ animal.date_of_intake }}" required>
+
+            <label for="last_grooming_date">Last Grooming Date:</label>
+            <input type="date" id="last_grooming_date" name="last_grooming_date" value="{{ animal.last_grooming_date }}" required>
+            
+            <label for="notes">Notes:</label>
+            <textarea id="notes" name="notes" required>{{ animal.notes }}</textarea>
+
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required>{{ animal.description }}</textarea>
+            
+            <input type="submit" value="Update Profile">
+        </form>
+        
+        <form action="{{ url_for('delete_animal') }}" method="post">
+            <input type="hidden" name="animal_id" value="{{ animal.animal_id }}">
+            <input type="submit" value="Delete Profile">
+        </form>
+        
+        <form action="{{ url_for('medical_record', animal_id=animal.animal_id) }}">
+            <input type="submit" value="Medical Record">
+        </form>
+        
+        <form action="{{ url_for('moment_record', animal_id=animal.animal_id) }}">
+            <input type="submit" value="Moment Record">
+        </form>
+    </div>
+</body>
+</html>

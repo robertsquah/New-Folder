@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'staff_main.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Transaction</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center; /* Center align body content */
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left; /* Left align text inside container */
+        }
+
+        h1 {
+            text-align: center; /* Center align heading */
+        }
+
+        form {
+            text-align: center; /* Center align form within container */
+        }
+
+        form label {
+            display: inline-block;
+            width: 150px;
+            text-align: right; /* Right align labels */
+            margin-right: 15px;
+        }
+
+        form input[type="text"],
+        form input[type="date"],
+        form input[type="number"],
+        form select {
+            width: 250px;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        form input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        form input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Transaction</h1>
+        <form action="/add_transaction" method="post">
+            <label for="adoption_id">Adoption ID:</label>
+            <input type="text" id="adoption_id" name="adoption_id" value="{{ adoption_id }}" readonly><br><br>
+            
+            <label for="animal_id">Animal ID:</label>
+            <input type="text" id="animal_id" name="animal_id" value="{{ animal_id }}" readonly><br><br>
+            
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" value="{{ username }}" readonly><br><br>
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" readonly><br><br>
+            
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description"><br><br>
+            
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" step="0.01"><br><br>
+
+            <label for="payment_method">Payment Method:</label>
+            <select id="payment_method" name="payment_method">
+                <option value="cash">Cash</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="debit_card">Debit Card</option>
+                <option value="online_banking">Online Banking</option>
+                <option value="e-wallet">E-wallet</option>
+            </select><br><br>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+        window.onload = function() {
+            var dateInput = document.getElementById('date');
+            var today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+        };
+    </script>
+</body>
+</html>

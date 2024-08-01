@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% include 'staff_main.html' %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Moment</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0; /* Optional: Background color for the body */
+        }
+        
+        .container {
+            width: 60%; /* Adjust width as needed */
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .container h1 {
+            text-align: center;
+        }
+        
+        form {
+            text-align: left;
+        }
+        
+        label {
+            display: inline-block;
+            width: 150px; /* Adjust width as needed */
+            text-align: right;
+            margin-right: 10px;
+            vertical-align: top; /* Align labels to the top of their respective inputs/textarea */
+        }
+        
+        input[type="text"],
+        input[type="date"],
+        textarea,
+        input[type="file"],
+        input[type="submit"] {
+            width: calc(100% - 170px); /* Adjust width accounting for label width */
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+            vertical-align: top; /* Align inputs/textarea to the top */
+        }
+        
+        input[type="submit"] {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 16px;
+            display: block;
+            margin: 0 auto; /* Center align the button */
+        }
+        
+        input[type="submit"]:hover {
+            background-color: #45a049; /* Darker green */
+        }
+        
+        /* Adjust layout for inline elements */
+        .form-row {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start; /* Align items to the top of the flex container */
+        }
+        
+        .form-row label {
+            width: 150px;
+            text-align: right;
+            margin-right: 10px;
+            line-height: 26px; /* Adjust line height to vertically center with inputs */
+        }
+        
+        .form-row input[type="file"],
+        .form-row textarea {
+            width: calc(100% - 170px); /* Adjust width accounting for label width */
+        }
+        
+        @media (max-width: 600px) {
+            .form-row {
+                display: block;
+            }
+            
+            .form-row label {
+                width: 100%;
+                text-align: left;
+                margin-bottom: 5px;
+            }
+            
+            .form-row input[type="file"],
+            .form-row textarea {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Moment</h1>
+        <form action="{{ url_for('add_moment', animal_id=animal_id) }}" method="post" enctype="multipart/form-data" onsubmit="capitalizeFirstLetter()">
+    
+            <div class="form-row">
+                <label for="animal_id">Animal ID:</label>
+                <input type="text" id="animal_id" name="animal_id" value="{{ animal_id }}" required readonly>
+            </div>
+            
+            <div class="form-row">
+                <label for="moment_photo">Moment Photo:</label>
+                <input type="file" name="moment_photo" id="moment_photo" accept="image/*" required>
+            </div>
+            
+            <div class="form-row">
+                <label for="moment_date">Moment Date:</label>
+                <input type="date" id="moment_date" name="moment_date" required>
+            </div>
+            
+            <div class="form-row">
+                <label for="caption">Caption:</label>
+                <textarea id="caption" name="caption" required></textarea>
+            </div>
+            
+            <div class="form-row">
+                <input type="submit" value="Upload Moment">
+            </div>
+        </form>
+    </div>
+    
+    <!-- Include any necessary JavaScript -->
+    <script>
+        function capitalizeFirstLetter() {
+            var inputField = document.getElementById("animal_id");
+            var value = inputField.value;
+            inputField.value = value.charAt(0).toUpperCase() + value.slice(1);
+        }
+        
+        // Set the value of the moment_date input to the current date
+        var currentDate = new Date().toISOString().slice(0, 10);
+        document.getElementById('moment_date').value = currentDate;
+        
+        function addPhotoInput() {
+            var photoInputs = document.getElementById('photoInputs');
+            // Check if there's already a file input present
+            if (photoInputs.getElementsByTagName('input').length === 0) {
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.name = 'moment_photo';
+                input.accept = 'image/*';
+                input.required = true;
+                photoInputs.appendChild(input);
+            } else {
+                alert("Only one photo allowed to be uploaded.");
+            }
+        }
+    </script>
+</body>
+</html>
