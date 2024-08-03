@@ -16,7 +16,7 @@ from datetime import datetime
 from pymongo import MongoClient
 
 # MongoDB connection
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb+srv://lionking:iOiyIkAZU8bRWPI4@cluster0.jmrqsig.mongodb.net/')
 db = client['user_database']
 user_collection = db['user']  # Collection for regular users
 staff_collection = db['staff']  # Collection for staff members
