@@ -70,6 +70,30 @@
         .action-buttons button.reject-button {
             background-color: #f44336;
         }
+        footer {
+            background-color: #FEF9EA; /* Match footer background color with header */
+            padding: 10px 20px; /* Add padding to footer */
+            text-align: center; /* Center text */
+            border-top: 1px solid #ddd; /* Optional: Add a border for distinction */
+            position: fixed; /* Fix the footer at the bottom */
+            bottom: 0; /* Align to the bottom of the viewport */
+            left: 0; /* Align to the left edge */
+            width: 100%; /* Full width */
+        }
+
+        footer p {
+            margin: 0; /* Remove default margin */
+            font-size: 14px; /* Font size */
+        }
+
+        footer a {
+            color: #ff3300; /* Change link color */
+            text-decoration: none; /* Remove underline */
+        }
+
+        footer a:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
     </style>
 </head>
 <body>
@@ -126,4 +150,7 @@
         {% endif %}
     </div>
 </body>
+<footer>
+    <p>If you have any enquiries or need to reschedule your appointment, please contact us at: <a href="tel:0112948938">0112948938</a></p>
+</footer>
 </html>
