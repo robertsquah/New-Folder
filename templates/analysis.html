@@ -296,6 +296,12 @@ function searchLocation() {
                     var selectedYear;
                     while (true) {
                         selectedYear = prompt("Enter the year:");
+                        // Check if user pressed Cancel
+                        if (selectedYear === null) {
+                            // Handle the case where user pressed Cancel
+                            alert("Operation cancelled.");
+                            return; // Exit the function or handle cancellation as needed
+                        }
                         if (/^\d{4}$/.test(selectedYear) && selectedYear >= 2020 && selectedYear <= 2050) {
                             break;
                         } else {
@@ -430,25 +436,44 @@ function searchLocation() {
     });
 
     function printPDF() {
+    // Get the selected values from dropdowns
+    var view = document.getElementById('viewSelector').value;
+    var dataType = document.getElementById('dataSelector').value;
+    
     // Capture the chart with a higher resolution
     html2canvas(document.getElementById('strayAnimalsChart'), {
-        scale: 4 // Increase the scale for higher resolution
+        scale: 6 // Increase scale for higher resolution
     }).then(function(canvas) {
         var imgData = canvas.toDataURL('image/png');
         var pdf = new jsPDF('landscape');
-        var imgWidth = 297; // A4 width in mm
+        
+        // Adjust image dimensions based on canvas size
+        var imgWidth = pdf.internal.pageSize.width - 20; // Adjust width to fit the page
         var imgHeight = canvas.height * imgWidth / canvas.width;
-        var title = document.querySelector('h2').innerText; // Capture the chart title
-
+        
+        // Ensure the image height does not exceed PDF page size
+        var pageHeight = pdf.internal.pageSize.height - 20; // Leave some margin
+        if (imgHeight > pageHeight) {
+            imgHeight = pageHeight;
+            imgWidth = canvas.width * imgHeight / canvas.height;
+        }
+        
+        var title = "Stray Animal Trends"; // Custom title
+        
         // Add the title to the PDF
         pdf.setFontSize(16);
-        pdf.text(title, 10, 10);
+        pdf.text(title, 10, 20); // Position the title
+
+        // Add selected values to the PDF
+        pdf.setFontSize(12);
+        pdf.text("View: " + view.charAt(0).toUpperCase() + view.slice(1), 10, 30); // Position the view info
+        pdf.text("Data Type: " + dataType.charAt(0).toUpperCase() + dataType.slice(1), 10, 40); // Position the data type info
 
         // Add the chart image
-        pdf.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 10, 50, imgWidth, imgHeight); // Adjust positioning as needed
         
         // Save the PDF
-        pdf.save('chart.pdf');
+        pdf.save('stray_animal_trends.pdf');
     });
 }
 
