@@ -55,13 +55,25 @@
 <body>
     <div class="container">
         <h1>Register New Staff</h1>
-        <form method="post">
-            <label for="staffid">Staff Id:</label><br>
+        <form id="registerForm" method="post">
+            <label for="staffid">Staff ID:</label><br>
             <input type="text" id="staffid" name="staffid" required><br>
             <label for="password">Password:</label><br>
-            <input type="password" id="password" name="password" required><br>
+            <input type="password" id="password" name="password" required minlength="6" title="Password must be at least 6 characters long"><br>
             <button type="submit">Register</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            var password = document.getElementById('password').value;
+            
+            // Validate password length
+            if (password.length < 6) {
+                alert("Password must be at least 6 characters long.");
+                event.preventDefault(); // Prevent form submission
+            }
+        });
+    </script>
 </body>
 </html>
