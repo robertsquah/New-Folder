@@ -69,7 +69,7 @@
         
         <div class="form-group">
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" required minlength="6">
         </div>
         
         <div class="form-group">
@@ -84,7 +84,8 @@
         
         <div class="form-group">
             <label for="phone_number">Phone Number:</label>
-            <input type="tel" id="phone_number" name="phone_number" required>
+            <input type="tel" id="phone_number" name="phone_number" required pattern="[0-9]+">
+            <small>Only digits are allowed for phone number.</small>
         </div>
         
         <div class="form-group">
@@ -94,5 +95,11 @@
         
         <input type="submit" class="register-button" value="Register">
     </form>
+    <script>
+        // Add JavaScript to ensure phone number input is numeric
+        document.getElementById('phone_number').addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    </script>
 </body>
 </html>
