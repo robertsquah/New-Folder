@@ -73,13 +73,13 @@
             <label for="staffid">Staff ID:</label>
             <input type="text" id="staffid" name="staffid" value="{{ staff.staffid }}" required readonly><br>
             <label for="old_password">Old Password (required for any changes):</label>
-            <input type="password" id="old_password" name="old_password"><br>
-            <label for="password">New Password:</label>
-            <input type="password" id="password" name="password"><br>
+            <input type="password" id="old_password" name="old_password" required><br>
+            <label for="password">New Password (min 6 characters):</label>
+            <input type="password" id="password" name="password" minlength="6" title="Password must be at least 6 characters long"><br>
             <label for="confirm_password">Confirm New Password:</label>
-            <input type="password" id="confirm_password" name="confirm_password"><br>
-            <label for="phone">Phone:</label>
-            <input type="text" id="phone" name="phone" value="{{ staff.phone }}"><br>
+            <input type="password" id="confirm_password" name="confirm_password" minlength="6" title="Password must be at least 6 characters long"><br>
+            <label for="phone">Phone (numbers only):</label>
+            <input type="text" id="phone" name="phone" value="{{ staff.phone }}" pattern="\d*" placeholder="Digits only><br>
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" value="{{ staff.email }}"><br>
             <label for="address">Address:</label>
@@ -99,20 +99,25 @@
             dateFormat: 'Y-m-d'
         });
 
-        // Function to validate form before submission
         document.getElementById('updateForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            
             var newPassword = document.getElementById('password').value;
             var confirmNewPassword = document.getElementById('confirm_password').value;
             var oldPassword = document.getElementById('old_password').value;
+            var phone = document.getElementById('phone').value;
             var errorMessageDiv = document.getElementById('error-message');
             
+            errorMessageDiv.textContent = ''; // Clear previous error messages
+            
             if (oldPassword.trim() === '') {
-                alert("Old password is required.");
+                errorMessageDiv.textContent = "Old password is required.";
                 return;
-            } else if (newPassword !== confirmNewPassword) {
-                alert("New password and confirm password do not match.");
+            } 
+            if (newPassword !== confirmNewPassword) {
+                errorMessageDiv.textContent = "New password and confirm password do not match.";
+                return;
+            }
+            if (!/^\d+$/.test(phone)) {
+                errorMessageDiv.textContent = "Phone number should contain only numbers.";
                 return;
             }
 
@@ -135,7 +140,6 @@
             });
         });
 
-        // Function to confirm user deletion
         document.getElementById('deleteForm').addEventListener('submit', function(event) {
             if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
                 event.preventDefault();
